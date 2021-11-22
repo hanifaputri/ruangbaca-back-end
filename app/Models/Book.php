@@ -14,6 +14,7 @@ class Book extends Model
      */
     protected $fillable = [
         // TODO: Insert your fillable fields
+        'title', 'description', 'author', 'year', 'synopsis', 'stock'
     ];
 
     /**
