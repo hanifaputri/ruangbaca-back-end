@@ -21,13 +21,13 @@ class UserController extends Controller
         if ($user->isEmpty()) {
             return response()->json([
                 'success' => true,
-                'message' => 'There are no users.',
+                'message' => 'There are no users',
             ], 200);
         }
 
         return response()->json([
             'success' => true,
-            'message' => 'Users are listed.',
+            'message' => 'Users are listed',
             'data' => [
                 'user' => $user,
             ],
@@ -42,7 +42,7 @@ class UserController extends Controller
         if (!$user) {
             return response()->json([
                 'success' => false,
-                'message' => 'User not found.',
+                'message' => 'User not found',
             ], 404);
         }
 
@@ -50,7 +50,7 @@ class UserController extends Controller
         if($request->user->hasRole('admin')) {
             return response()->json([
                 'success' => true,
-                'message' => 'User is found.',
+                'message' => 'User is found',
                 'data' => [
                     'user' => $user,
                 ],
@@ -61,7 +61,7 @@ class UserController extends Controller
         if ($user->email != $request->user->email) {
             return response()->json([
                 'success' => false,
-                'message' => 'Invalid data.',
+                'message' => 'Forbidden Data Request',
             ], 403);
         }
 
@@ -89,7 +89,7 @@ class UserController extends Controller
         if ($user->email != $request->user->email) {
             return response()->json([
                 'success' => false,
-                'message' => 'Invalid data.',
+                'message' => 'Forbidden Data Request',
             ], 403);
         }
 
@@ -103,7 +103,7 @@ class UserController extends Controller
             ],
         ], 200);
     }
-
+    
     public function destroy(Request $request, $idUser)
     {
         $user = User::find($idUser);
@@ -113,6 +113,13 @@ class UserController extends Controller
                 'success' => false,
                 'message' => 'User not found.',
             ], 404);
+        }
+
+        if ($user->email != $request->user->email) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Forbidden Data Request',
+            ], 403);
         }
 
         $user->delete($idUser);
