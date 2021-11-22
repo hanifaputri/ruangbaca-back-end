@@ -30,6 +30,7 @@ $router->group(['prefix' => 'auth'], function () use ($router) {
 $router->group(['prefix' => 'books'], function () use ($router) {
     $router->get('/', function () {
         // TODO: Routes this to the right controller
+        
     });
 
     $router->get('/{bookId}', function () {
@@ -39,18 +40,11 @@ $router->group(['prefix' => 'books'], function () use ($router) {
 
 $router->group(['middleware' => 'auth'], function () use ($router) {
     $router->group(['prefix' => 'users'], function () use ($router) {
-        $router->get('/{userId}', function () {
-            // TODO: Routes this to the right controller
-            
-        });
+        $router->get('/{userId}', ['uses' => 'UserController@getUser']);
 
-        $router->put('/{userId}', function () {
-            // TODO: Routes this to the right controller
-        });
+        $router->put('/{userId}', ['uses' => 'UserController@updateUser']);
 
-        $router->delete('/{userId}', function () {
-            // TODO: Routes this to the right controller
-        });
+        $router->delete('/{userId}', ['uses' => 'UserController@destroy']);
     });
 
     $router->group(['prefix' => 'transactions'], function () use ($router) {
@@ -66,9 +60,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
 
 $router->group(['middleware' => 'auth:admin'], function () use ($router) {
     $router->group(['prefix' => 'users'], function () use ($router) {
-        $router->get('/', function () {
-            // TODO: Routes this to the right controller
-        });
+        $router->get('/{userId}', ['uses' => 'UserController@index']);
     });
 
     $router->group(['prefix' => 'books'], function () use ($router) {
