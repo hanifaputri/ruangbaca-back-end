@@ -15,7 +15,9 @@ class CreateUsers extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            // This is where you type your code
+            $table->string('name');
+            $table->string('email');
+            $table->string('password');
 
             $table->enum('role', ['user', 'admin']);
             $table->timestamps();
