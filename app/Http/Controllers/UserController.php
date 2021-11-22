@@ -16,117 +16,136 @@ class UserController extends Controller
 
    public function index(Request $request)
     {
+        //show all users
         $user = User::all();
 
-        if ($user->isEmpty()) {
+        if ($user) {
             return response()->json([
                 'success' => true,
-                'message' => 'There are no users',
+                'message' => 'Users are found',
             ], 200);
+        } else if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to get users'
+            ], 400);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Internal server error'
+            ], 500);
         }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Users are listed',
-            'data' => [
-                'user' => $user,
-            ],
-        ], 200);
     }
 
-    public function show(Request $request, $idUser)
+    public function getUser(Request $request, $idUser)
     {
-        $user = User::find($idUser);
+        // Request user access if role == admin
+        $userRequest = $request->auth;
+        if ($userRequest->role == 'admin') {
+            User::find($idUser);
+        } else {
+            User::find($userRequest->id);
+        }
 
-        // No data user
-        if (!$user) {
+        // Get data user by ID
+        if ($user) {
+            if ($user->role != 'user') {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'User is found',
+                    'data' => [
+                        'user' => $user
+                    ]
+                ], 200);
+            } else if ($user->role != $idUser) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Forbidden data request'
+                ], 403);
+            } else {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'User is found'
+                ], 200);
+            }
+
+        // If ID user is not found
+        } else if (!$user) {
             return response()->json([
                 'success' => false,
                 'message' => 'User not found',
             ], 404);
-        }
-
-        // User 'Admin' is found
-        if($request->user->hasRole('admin')) {
-            return response()->json([
-                'success' => true,
-                'message' => 'User is found',
-                'data' => [
-                    'user' => $user,
-                ],
-            ], 200);
-        }
-
-        // Access denial
-        if ($user->email != $request->user->email) {
+        } else {
             return response()->json([
                 'success' => false,
-                'message' => 'Forbidden Data Request',
-            ], 403);
+                'message' => 'Internal server error'
+            ], 500);
         }
-
-        // Other role is found
-        return response()->json([
-            'success' => true,
-            'message' => 'User is found',
-            'data' => [
-                'user' => $user,
-            ],
-        ], 200);
     }
 
-    public function update(Request $request, $idUser)
+    public function updateUser(Request $request, $idUser)
     {
         $user = User::find($idUser);
 
-        if (!$user) {
+        // Update data by ID user
+        if ($user) {
+            if ($request->auth->id == $idUser) {
+                $user->update($request->all());
+                return response()->json([
+                    'success' => true,
+                    'message' => 'User has been updated'
+                ], 200);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Forbidden data request'
+                ], 403);
+            }
+        
+        // If ID user is not found
+        } else if (!$user) {
             return response()->json([
                 'success' => false,
-                'message' => 'User not found',
+                'message' => 'User update is failed'
             ], 404);
-        }
-
-        if ($user->email != $request->user->email) {
+        } else {
             return response()->json([
                 'success' => false,
-                'message' => 'Forbidden Data Request',
-            ], 403);
+                'message' => 'Internal server error'
+            ]);
         }
-
-        $user->update($request->all());
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Data user has been updated!',
-            'data' => [
-                'user' => $user,
-            ],
-        ], 200);
     }
     
     public function destroy(Request $request, $idUser)
     {
         $user = User::find($idUser);
 
-        if (!$user) {
+        // Delete data by ID user
+        if ($user) {
+            if ($request->auth->id == $idUser) {
+                $user->delete($idUser);
+                return response()->json([
+                    'success' => true,
+                    'message' => 'User has been deleted'
+                ], 200);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Forbidden data request'
+                ]);
+            }
+            
+        // If ID user is not found
+        } else if (!$user) {
             return response()->json([
                 'success' => false,
-                'message' => 'User not found.',
+                'message' => 'Failed to delete data user'
             ], 404);
-        }
-
-        if ($user->email != $request->user->email) {
+        } else {
             return response()->json([
                 'success' => false,
-                'message' => 'Forbidden Data Request',
-            ], 403);
+                'message' => 'Internal server error'
+            ], 500);
         }
-
-        $user->delete($idUser);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Data user has been deleted.',
-        ], 200);
     }
 }

@@ -41,6 +41,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
     $router->group(['prefix' => 'users'], function () use ($router) {
         $router->get('/{userId}', function () {
             // TODO: Routes this to the right controller
+            
         });
 
         $router->put('/{userId}', function () {
