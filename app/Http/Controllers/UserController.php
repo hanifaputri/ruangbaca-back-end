@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+
 class UserController extends Controller
 {
     /**
@@ -19,66 +23,61 @@ class UserController extends Controller
         //show all users
         $user = User::all();
 
-        if ($user) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Users are found',
-            ], 200);
-        } else if (!$user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to get users'
-            ], 400);
-        } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'Internal server error'
-            ], 500);
-        }
-    }
-
-    public function getUser(Request $request, $idUser)
-    {
-        // Request user access if role == admin
-        $userRequest = $request->auth;
-        if ($userRequest->role == 'admin') {
-            User::find($idUser);
-        } else {
-            User::find($userRequest->id);
-        }
-
-        // Get data user by ID
-        if ($user) {
-            if ($user->role != 'user') {
+        try {
+            if ($user) {
                 return response()->json([
                     'success' => true,
-                    'message' => 'User is found',
+                    'message' => 'User ditemukan',
                     'data' => [
                         'user' => $user
                     ]
                 ], 200);
-            } else if ($user->role != $idUser) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Forbidden data request'
-                ], 403);
             } else {
                 return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal mengambil data user'
+                ], 400);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan pada server'
+            ], 500);
+        }
+    }
+
+    public function getUserById(Request $request, $idUser)
+    {
+        $user = null;
+
+        /// Request user access if role == admin
+        $userRequest = $request->auth;
+        if ($userRequest == 'admin') {
+            $user = User::find($idUser);
+        } else {
+            $user = User::find($userRequest->id);
+        }
+
+        // Get data user by ID
+        try {
+            if ($user) {
+                return response()->json([
                     'success' => true,
-                    'message' => 'User is found'
+                    'message' => 'User ditemukan',
+                    'data' => [
+                        'user' => $user
+                    ]
+                ], 200);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal mengambil data user'
                 ], 200);
             }
-
-        // If ID user is not found
-        } else if (!$user) {
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'User not found',
-            ], 404);
-        } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'Internal server error'
+                'message' => 'Terjadi kesalahan pada server'
             ], 500);
         }
     }
@@ -88,30 +87,26 @@ class UserController extends Controller
         $user = User::find($idUser);
 
         // Update data by ID user
-        if ($user) {
-            if ($request->auth->id == $idUser) {
-                $user->update($request->all());
+        try {
+            if ($user) {
+                $user->name = $request->input('name');
+                $user->email = $request->input('email');
+                $user->password = Hash::make($request->input('password'));
+                $user->save();
                 return response()->json([
                     'success' => true,
-                    'message' => 'User has been updated'
+                    'message' => 'User berhasil diupdate'
                 ], 200);
             } else {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Forbidden data request'
-                ], 403);
+                    'message' => 'ID User tidak ditemukan'
+                ], 404);
             }
-        
-        // If ID user is not found
-        } else if (!$user) {
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'User update is failed'
-            ], 404);
-        } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'Internal server error'
+                'message' => 'Terjadi kesalahan pada server'
             ]);
         }
     }
@@ -121,30 +116,23 @@ class UserController extends Controller
         $user = User::find($idUser);
 
         // Delete data by ID user
-        if ($user) {
-            if ($request->auth->id == $idUser) {
-                $user->delete($idUser);
+        try {
+            if ($user) {
+                $user->delete();
                 return response()->json([
                     'success' => true,
-                    'message' => 'User has been deleted'
+                    'message' => 'User berhasil dihapus'
                 ], 200);
             } else {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Forbidden data request'
-                ]);
+                    'message' => 'ID User tidak ditemukan'
+                ], 404);
             }
-            
-        // If ID user is not found
-        } else if (!$user) {
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to delete data user'
-            ], 404);
-        } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'Internal server error'
+                'message' => 'Terjadi kesalahan pada server'
             ], 500);
         }
     }
