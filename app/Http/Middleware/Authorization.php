@@ -32,26 +32,26 @@ class Authorization
             $user = JWT::decode($jwt,env('JWT_KEY'),['HS256']);
             // dd($user->data->id);
             // dd($user->data);
-        } catch (BeforeValidException $bve) {
+        } catch (\Firebase\JWT\BeforeValidException $bve) {
             return response()->json([
                 'success'=>false,
-                'message'=>'JWT error: ',$bve->getMessage()
+                'message'=>'JWT error: ' . $bve->getMessage()
             ], 401);
-        } catch (ExpiredException $ee){
+        } catch (\Firebase\JWT\ExpiredException $ee){
             return response()->json([
                 'success'=>false,
-                'message'=>'JWT error: ',$ee->getMessage()
+                'message'=>'JWT error: '. $ee->getMessage()
             ], 401);
-        } catch (SignatureInvalidException $sie){
+        } catch (\Firebase\JWT\SignatureInvalidException $sie){
             return response()->json([
                 'success'=>false,
-                'message'=>'JWT error: ',$sie->getMessage()
+                'message'=>'JWT error: '. $sie->getMessage()
             ], 401);
         } catch (Exception $e){
             return response()->json([
                 'success'=>false,
                 'message'=>'Terjadi kesalahan server'
-            ], 500);
+            ], $e->getStatusCode());
         }   
 
         $id = $user->data->id;
