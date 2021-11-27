@@ -13,18 +13,15 @@
 |
  */
 
-$router->get('/', function () use ($router) {
+/*$router->get('/', function () use ($router) {
     return $router->app->version();
-});
+});*/
+
+$router->get('/', ['uses' => 'AuthController@test','middleware'=>'auth:user']);
 
 $router->group(['prefix' => 'auth'], function () use ($router) {
-    $router->post('/register', function () {
-        // TODO: Routes this to the right controller
-    });
-
-    $router->post('/login', function () {
-        // TODO: Routes this to the right controller
-    });
+    $router->post('/register', ['uses' => 'AuthController@register']);
+    $router->post('/login', ['uses' => 'AuthController@login']);
 });
 
 $router->group(['prefix' => 'books'], function () use ($router) {
