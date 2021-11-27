@@ -56,39 +56,43 @@ class TransactionController extends Controller
         }
     }
 
-    public function getTransactionId($transactionId)
+    public function getTransactionId(Request $request, $transactionId)
     {
-        $transaction = Transaction::join('book', 'transaction.book_id', '=', 'book.id')->join('user', 'transaction.user_id', '=', 'user.id')->where('id', $transactionId)->first();
+        $transaction = Transaction::where('id', $transactionId)->first();
 
         try {
             if ($transaction) {
+                $user = Transaction::find($transactionId)->user()->select(
+                    [
+                    // Define which attribute will be returned in user data
+                        'name', 'email'
+                    ])->get();
+                    
+                $book = Transaction::find($transactionId)->book()->select(
+                    [
+                    // Define which attribute will be returned in book data
+                        'title', 'author'
+                    ])->get();
+
                 return response()->json([
                     'success' => true,
                     'message' => 'Transaction succesfully retrieved',
                     'data' => [
-                        'id' => $transaction['id'],
-                        'user' => [
-                            'name' => $transaction['name'],
-                            'email' => $transaction['email']
-                        ],
-                        'book' => [
-                            'title' => $transaction['title'],
-                            'author' => $transaction['author']
-                        ],
-                        'created_at' => $transaction['created_at'],
-                        'updated_at' => $transaction['updated_at']
+                        'id' => $transactionId,
+                        'user' => $user,
+                        'book' => $book
                     ]
                 ], 200);
             } else {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Unable to retrieve transaction'
+                    'message' => 'Transactionn not found'
                 ], 404);
             }
-        } catch (Throwable $e) {
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Server error',
+                'message' => 'Terjadi kesalahan server: ' . $e.getMessage()
             ]);
         }
     }
