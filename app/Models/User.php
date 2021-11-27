@@ -32,4 +32,14 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     protected $hidden = [
         'password', 'role', 'created_at', 'updated_at', 'deleted_at'
     ];
+
+     /**
+     * Define relationship betweeen users and transactions
+     * 
+     * 
+     */
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
+    }
 }
