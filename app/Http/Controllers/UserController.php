@@ -99,10 +99,14 @@ class UserController extends Controller
     public function updateUser(Request $request, $userId)
     {
         $user = User::find($userId);
+        $validated = $this->validate($request, [
+            'email'     => 'email',
+            'role'      => 'in:Admin,User'
+        ]);
 
         // Update data by ID user
         try {
-            if ($request->auth->role == 'user' && $request->auth->id == $userId) {
+            if ($request->auth->id == $userId) {
                 $user->name = $request->input('name');
                 $user->email = $request->input('email');
                 $user->password = Hash::make($request->input('password'));
@@ -134,7 +138,7 @@ class UserController extends Controller
         
         // Delete data by ID user
         try {
-            if ($request->auth->role == 'user' && $request->auth->id == $userId) {
+            if ($request->auth->id == $userId) {
                 $user->delete();
                 return response()->json([
                     'success' => true,
