@@ -22,15 +22,5 @@ class Transaction extends Model
      * @var array
      */
     protected $hidden = [
-        
     ];
-
-    /**
-     * Get the comments for the blog post.
-     * 
-     */
-    public function comments()
-    {
-        return $this->hasMany(Comment::class);
-    }
 }
