@@ -128,16 +128,24 @@ class TransactionController extends Controller
 
         try {
             if ($transaction) {
-                $transaction->book_id = $request->input('book_id');
-                $transaction->user_id = $request->input('user_id');
-                $transaction->dateline = $request->input('dateline');
-                $transaction->update_at = date('Y-m-d H:i:s');
-                $transaction->save();
+                $book = Book::where('id', $transaction->book_id)->first();
 
+                // Update book stock only if it hasn't returned
+                if (isset($transaction->deadline)){
+                    $transaction->deadline = null;
+                    $book->stock += 1;
+                    // Commit update
+                    $book->save();
+                    $transaction->save();
+                }
+
+                // Else just return a message
                 return response()->json([
                     'success' => true,
-                    'message' => 'Data succesfully updated',
-                    'data' => $transaction
+                    'message' => 'Book has succesfully returned',
+                    'data' => [
+                        'transaction' => $transaction
+                    ]
                 ], 200);
             } else {
                 return response()->json([
@@ -145,11 +153,11 @@ class TransactionController extends Controller
                     'message'   => 'Transaction not found',
                 ], 404);
             }
-        } catch (Throwable $e) {
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Server error',
-            ]);
+                'message' => 'Terjadi kesalahan pada server: ' . $e->getMessage(),
+            ], 500);
         }
     }
 }
