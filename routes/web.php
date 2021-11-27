@@ -40,13 +40,9 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
     });
 
     $router->group(['prefix' => 'transactions'], function () use ($router) {
-        $router->get('/', function () {
-            // TODO: Routes this to the right controller
-        });
+        $router->get('/', ['transaction' => 'TransactionController@getAllTransaction']);
 
-        $router->get('/{transactionId}', function () {
-            // TODO: Routes this to the right controller
-        });
+        $router->get('/{transactionId}', ['transaction' => 'TransactionController@getTransactionId']);
     });
 });
 
@@ -66,16 +62,12 @@ $router->group(['middleware' => 'auth:admin'], function () use ($router) {
     });
 
     $router->group(['prefix' => 'transactions'], function () use ($router) {
-        $router->put('/{transactionId}', function () {
-            // TODO: Routes this to the right controller
-        });
+        $router->put('/{transactionId}', ['transaction' => 'TransactionController@update']);
     });
 });
 
 $router->group(['middleware' => 'auth:user'], function () use ($router) {
     $router->group(['prefix' => 'transactions'], function () use ($router) {
-        $router->post('/', function () {
-            // TODO: Routes this to the right controller
-        });
+        $router->post('/', ['transaction' => 'TransactionController@insert']);
     });
 });
