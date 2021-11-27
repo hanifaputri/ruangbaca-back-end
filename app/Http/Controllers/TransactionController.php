@@ -95,7 +95,10 @@ class TransactionController extends Controller
                     'data' => [
                         'id' => $transactionId,
                         'user' => $user,
-                        'book' => $book
+                        'book' => $book,
+                        'deadline' => $transaction->deadline,
+                        'created_at' => $transaction->created_at,
+                        'updated_at' => $transaction->updated_at,
                     ]
                 ], 200);
             } else {
