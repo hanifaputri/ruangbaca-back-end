@@ -70,7 +70,6 @@ class AuthController extends Controller
                 'message'=>$e->getMessage()
             ], 500);
         }
-
     }
 
     public function login(Request $request){

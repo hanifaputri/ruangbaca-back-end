@@ -33,11 +33,11 @@ class BookController extends Controller
                     'message' => 'Unable to retrieve book data',
                 ], 404);
             }
-        } catch (Throwable $e){
+        } catch (\Exception $e){
             return response()->json([
                 'success' => false,
-                'message' => 'Server error',
-            ]);
+                'message' => 'Terjadi kesalahan pada server',
+            ],$e->getStatusCode());
         }
     }
 
@@ -58,16 +58,23 @@ class BookController extends Controller
                     'message' => 'Book not found',
                 ], 404);
             }
-        } catch (Throwable $e){
+        } catch (\Exception $e){
             return response()->json([
                 'success' => false,
-                'message' => 'Server error',
-            ]);
+                'message' => 'Terjadi kesalahan pada server',
+            ],$e->getStatusCode());
         }
     }
 
     public function insert(Request $request){
         $input = $request->input();
+
+        $this->validate($request, [
+            'title'         =>'required',
+            'year'          =>'integer',
+            'stock'         =>'required|integer',
+        ]);
+
         try {
             if ($input) {
                 $book = Book::create([
@@ -90,8 +97,11 @@ class BookController extends Controller
                     'message'   => 'Please complete the required field',
                 ], 404);
             }
-        } catch (Throwable $e) {
-            echo "Error";
+        } catch (\Exception $e){
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan pada server',
+            ],$e->getStatusCode());
         }
     }
 
@@ -99,25 +109,37 @@ class BookController extends Controller
     {
         $book = Book::where('id', $bookId)->first();
 
-        if ($book) {
-            $book->title = $request->input('title');
-            $book->description = $request->input('description');
-            $book->author = $request->input('author');
-            $book->year = (int) $request->input('year');
-            $book->synopsis = $request->input('synopsis');
-            $book->stock = (int) $request->input('stock');
-            $book->save();
+        $this->validate($request, [
+            'year'          =>'integer',
+            'stock'         =>'integer',
+        ]);
 
+        try {
+            if ($book) {
+                $book->title = $request->input('title');
+                $book->description = $request->input('description');
+                $book->author = $request->input('author');
+                $book->year = (int) $request->input('year');
+                $book->synopsis = $request->input('synopsis');
+                $book->stock = (int) $request->input('stock');
+                $book->save();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Data succesfully updated',
+                    'data' => $book
+                ], 200);
+            } else {
+                return response()->json([
+                    'success'   => false,
+                    'message'   => 'Book not found',
+                ], 404);
+            }
+        } catch (\Exception $e){
             return response()->json([
-                'success' => true,
-                'message' => 'Data succesfully updated',
-                'data' => $book
-            ], 200);
-        } else {
-            return response()->json([
-                'success'   => false,
-                'message'   => 'Book not found',
-            ], 404);
+                'success' => false,
+                'message' => 'Terjadi kesalahan pada server',
+            ],$e->getStatusCode());
         }
     }
 
@@ -125,28 +147,35 @@ class BookController extends Controller
     {
         $book = Book::where('id', $bookId)->first();
         
-        if ($book){
-            $book->delete();
+        try {
+            if ($book){
+                $book->delete();
 
-            if($book->trashed()) {
-                $deletedBook = Book::onlyTrashed()->where('id', $bookId)->get();
+                if($book->trashed()) {
+                    $deletedBook = Book::onlyTrashed()->where('id', $bookId)->get();
 
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Data succesfully deleted',
-                    'data' => $deletedBook
-                ], 200);
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Data succesfully deleted',
+                        'data' => $deletedBook
+                    ], 200);
+                } else {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Unable to delete file'
+                    ], 404);
+                }
             } else {
                 return response()->json([
-                    'success' => false,
-                    'message' => 'Unable to delete file'
+                    'success'   => false,
+                    'message'   => 'Book not found',
                 ], 404);
             }
-        } else {
+        } catch (\Exception $e){
             return response()->json([
-                'success'   => false,
-                'message'   => 'Book not found',
-            ], 404);
+                'success' => false,
+                'message' => 'Terjadi kesalahan pada server',
+            ],$e->getStatusCode());
         }
     }
 
@@ -155,22 +184,28 @@ class BookController extends Controller
         $bookId = $request->input('id');
         $book = Book::onlyTrashed()->where('id', $bookId);
 
-        if ($book){
-            $book->restore();
-            $restoredBook = Book::where('id', $bookId)->get();
+        try {
+            if ($book){
+                $book->restore();
+                $restoredBook = Book::where('id', $bookId)->get();
 
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Data succesfully restored',
+                    'data' => $restoredBook
+                ], 200);
+            } else {
+                return response()->json([
+                    'success'   => false,
+                    'message'   => 'No deleted record found',
+                ], 404);
+            }
+        } catch (\Exception $e){
             return response()->json([
-                'success' => true,
-                'message' => 'Data succesfully restored',
-                'data' => $restoredBook
-            ], 200);
-        } else {
-            return response()->json([
-                'success'   => false,
-                'message'   => 'No deleted record found',
-            ], 404);
+                'success' => false,
+                'message' => 'Terjadi kesalahan pada server',
+            ],$e->getStatusCode());
         }
-       
     }
 
     // TODO: Create book logic
