@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Book;
+use App\Models\User;
 use App\Models\Transaction;
+use Illuminate\Http\Request;
 
 class TransactionController extends Controller
 {
@@ -92,33 +95,49 @@ class TransactionController extends Controller
 
     public function insert(Request $request)
     {
-        $input = $request->input();
+        $id = $request->input('book_id');
+
+        $validated = $this->validate($request, [
+            'book_id' => 'integer|required'
+        ]);
 
         try {
-            if ($input) {
-                $transaction = Transaction::create([
-                    'book_id' => $input['book_id'],
-                    'user_id' => $input['user_id'],
-                    'dateline' => $input['dateline'],
-                    'created_at' => date('Y-m-d H:i:s')
-                ]);
+            $book = Book::where('id', $id)->first();
+            if ($book) {
+                if ($book->stock > 0){
+                    $transaction = Transaction::create([
+                        'book_id' => $id,
+                        'user_id' => $request->auth->id,
+                        'deadline' => date('Y-m-d H:i:s', time() + 7 * 24 * 60 * 60)
+                    ]);
     
-                return response()->json([
-                    'success'   => true,
-                    'message'   => 'Transaction successfully added',
-                    'data'      => $transaction
-                ], 200);
+                    $book->stock -= 1;
+                    // Commit update
+                    $book->save();
+                    $transaction->save();
+        
+                    return response()->json([
+                        'success'   => true,
+                        'message'   => 'Transaction successfully added',
+                        'data'      => $transaction
+                    ], 200);
+                } else {
+                    return response()->json([
+                        'success'   => false,
+                        'message'   => 'Book not available'
+                    ], 400);
+                }
             } else {
                 return response()->json([
                     'success'   => false,
-                    'message'   => 'Please complete the required field',
+                    'message'   => 'Book not found'
                 ], 404);
             }
-        } catch (Throwable $e) {
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Server error',
-            ]);
+                'message' => 'Terjadi kesalahan pada server: '. $e->getMessage()
+            ], 500);
         }
     }
 
