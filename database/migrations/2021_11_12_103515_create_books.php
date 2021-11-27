@@ -13,10 +13,17 @@ class CreateBooks extends Migration
      */
     public function up()
     {
+        // php artisan migrate --path=/database/migrations/2021_11_12_103515_create_books.php
         Schema::create('books', function (Blueprint $table) {
-            $table->id();
             // This is where you type your code
 
+            $table->id();
+            $table->string('title');
+            $table->string('description');
+            $table->string('author');
+            $table->integer('year');
+            $table->string('synopsis');
+            $table->integer('stock');
             $table->timestamps();
         });
     }

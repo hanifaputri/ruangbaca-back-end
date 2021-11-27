@@ -13,9 +13,9 @@
 |
  */
 
-/*$router->get('/', function () use ($router) {
+$router->get('/', function () use ($router) {
     return $router->app->version();
-});*/
+});
 
 $router->get('/', ['uses' => 'AuthController@test','middleware'=>'auth:user']);
 
@@ -25,14 +25,9 @@ $router->group(['prefix' => 'auth'], function () use ($router) {
 });
 
 $router->group(['prefix' => 'books'], function () use ($router) {
-    $router->get('/', function () {
-        // TODO: Routes this to the right controller
-        
-    });
+    $router->get('/', ['uses' => 'BookController@getAllBooks']);
 
-    $router->get('/{bookId}', function () {
-        // TODO: Routes this to the right controller
-    });
+    $router->get('/{bookId}', ['uses' => 'BookController@getBookById']);
 });
 
 $router->group(['middleware' => 'auth'], function () use ($router) {
@@ -57,17 +52,13 @@ $router->group(['middleware' => 'auth:admin'], function () use ($router) {
     });
 
     $router->group(['prefix' => 'books'], function () use ($router) {
-        $router->post('/', function () {
-            // TODO: Routes this to the right controller
-        });
+        $router->post('/', ['uses' => 'BookController@insert']);
 
-        $router->put('/{bookId}', function () {
-            // TODO: Routes this to the right controller
-        });
+        $router->put('/{bookId}', ['uses' => 'BookController@update']);
 
-        $router->delete('/{bookId}', function () {
-            // TODO: Routes this to the right controller
-        });
+        $router->delete('/{bookId}', ['uses' => 'BookController@delete']);
+
+        $router->post('/restore', ['uses' => 'BookController@restore']);
     });
 
     $router->group(['prefix' => 'transactions'], function () use ($router) {

@@ -99,6 +99,10 @@ class UserController extends Controller
     public function updateUser(Request $request, $userId)
     {
         $user = User::find($userId);
+        $validated = $this->validate($request, [
+            'email'     => 'email',
+            'role'      => 'in:Admin,User'
+        ]);
 
         // Update data by ID user
         try {

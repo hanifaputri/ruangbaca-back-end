@@ -26,52 +26,74 @@ class Authorization
         }
 
         $jwt = str_replace('Bearer ','',$jwt);
+
         $user = null;
         try {
             $user = JWT::decode($jwt,env('JWT_KEY'),['HS256']);
             // dd($user->data->id);
             // dd($user->data);
-
-        } catch (BeforeValidException $bve) {
+        } catch (\Firebase\JWT\BeforeValidException $bve) {
             return response()->json([
                 'success'=>false,
-                'message'=>'JWT error: ',$bve->getMessage()
+                'message'=>'JWT error: ' . $bve->getMessage()
             ], 401);
-        } catch (ExpiredException $ee){
+        } catch (\Firebase\JWT\ExpiredException $ee){
             return response()->json([
                 'success'=>false,
-                'message'=>'JWT error: ',$ee->getMessage()
+                'message'=>'JWT error: '. $ee->getMessage()
             ], 401);
-        } catch (SignatureInvalidException $sie){
+        } catch (\Firebase\JWT\SignatureInvalidException $sie){
             return response()->json([
                 'success'=>false,
-                'message'=>'JWT error: ',$sie->getMessage()
+                'message'=>'JWT error: '. $sie->getMessage()
             ], 401);
         } catch (Exception $e){
             return response()->json([
                 'success'=>false,
                 'message'=>'Terjadi kesalahan server'
-            ], 500);
-        }
-        
-        if ($user && $this->hasRole($role, $user)){
+            ], $e->getStatusCode());
+        }   
+
+        $id = $user->data->id;
+        // dd($this->hasRole($id, $role));
+        // role = null
+
+        if ($this->isUserExist($id)){
             $request->auth = $user->data;
-            $role = User::find($user->data->id)->role;
-            // dd($role);
-            $request->auth->role = $role;
-            return $next($request);
-            // var_dump($request->auth);
-            // die();
+            // Append role to auth
+            $request->auth->role = $this->getRole($id);
+
+            if ($role) {
+                if ($this->hasRole($id, $role)){
+                    // var_dump($request->auth);
+                    // die();
+                    return $next($request);
+                } else {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Forbiden access'
+                    ], 403);
+                }
+            } else {
+                // Accept request if no specific parameter included
+                return $next($request);
+            }
         } else {
             return response()->json([
                 'success'=>false,
-                'message'=>'You are not allowed to access'
-            ], 403);
+                'message'=>'User not exist'
+            ], 404);
         }
     }
+    private function getRole($id){
+        return User::find($id)->role;
+    }
+
+    private function hasRole($id, $role){
+        return User::where('id', $id)->where('role', $role)->exists();
+    }
     
-    private function hasRole($role, $user){
-        return User::where('id', $user->data->id)->where('role', $role);
-        // dd($user->data->id);
+    private function isUserExist($id){
+        return User::where('id', $id)->exists();
     }
 }
