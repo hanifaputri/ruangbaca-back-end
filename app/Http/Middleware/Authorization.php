@@ -18,17 +18,21 @@ class Authorization
     public function handle($request, Closure $next, $role=null)
     {
         $jwt = $request->header('Authorization')?? $request->header('authorization');
+        // dd($role);
+
         if (!$jwt)
             return response()->json([
                 'success'=>false,
                 'message'=>'JWT Tidak ada'
             ], 403);
+            
             $jwt = str_replace('Bearer ','',$jwt);
             $user = null;
             try {
                 $user = JWT::decode($jwt,env('JWT_KEY'),['HS256']);
                // dd($user->data->id);
-               // dd($user->data);
+            //    dd($user->data);
+            // dd($user);
 
             } catch (BeforeValidException $bve) {
                 return response()->json([
@@ -51,10 +55,16 @@ class Authorization
                     'message'=>'Terjadi kesalahan server'
                 ], 500);
             }
+            
+            // echo ($this->hasRole($role, $user)) ? "Ya" : "Tidak";
+            // dd();
+
             if ($user && $this->hasRole($role, $user)){
                $request->auth = $user->data;
+            //    echo "Ada admin";
                return $next($request);
-               
+            } else if ($user) {
+                
             } else {
                 return response()->json([
                     'success'=>false,
@@ -63,7 +73,7 @@ class Authorization
             }
     }
     private function hasRole($role, $user){
-        return User::where('id', $user->data->id)->where('role', $user->role);
-        //dd($user->data->id);
+        return User::where('id', $user->data->id)->where('role', $role)->first();
+        // dd($user->data->id);
     }
 }

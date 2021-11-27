@@ -29,61 +29,55 @@ $router->group(['prefix' => 'books'], function () use ($router) {
 
     $router->get('/{bookId}', ['uses' => 'BookController@getBookById']);
 
-    $router->post('/', ['uses' => 'BookController@insert']);
+//     $router->post('/', ['uses' => 'BookController@insert']);
 
-    $router->put('/{bookId}', ['uses' => 'BookController@update']);
+//     $router->put('/{bookId}', ['uses' => 'BookController@update']);
 
-    $router->delete('/{bookId}', ['uses' => 'BookController@delete']);
+//     $router->delete('/{bookId}', ['uses' => 'BookController@delete']);
 
-    $router->post('/restore', ['uses' => 'BookController@restore']);
+//     $router->post('/restore', ['uses' => 'BookController@restore']);
 });
 
-// $router->group(['middleware' => 'auth'], function () use ($router) {
-//     $router->group(['prefix' => 'users'], function () use ($router) {
-//         $router->get('/{userId}', function () {
-//             // TODO: Routes this to the right controller
-//         });
+$router->group(['middleware' => 'auth'], function () use ($router) {
+    $router->group(['prefix' => 'users'], function () use ($router) {
+        $router->get('/{userId}', function () {
+            // TODO: Routes this to the right controller
+        });
 
-//         $router->put('/{userId}', function () {
-//             // TODO: Routes this to the right controller
-//         });
+        $router->put('/{userId}', function () {
+            // TODO: Routes this to the right controller
+        });
 
-//         $router->delete('/{userId}', function () {
-//             // TODO: Routes this to the right controller
-//         });
-//     });
+        $router->delete('/{userId}', function () {
+            // TODO: Routes this to the right controller
+        });
+    });
 
-//     $router->group(['prefix' => 'transactions'], function () use ($router) {
-//         $router->get('/', function () {
-//             // TODO: Routes this to the right controller
-//         });
+    $router->group(['prefix' => 'transactions'], function () use ($router) {
+        $router->get('/', function () {
+            // TODO: Routes this to the right controller
+        });
 
-//         $router->get('/{transactionId}', function () {
-//             // TODO: Routes this to the right controller
-//         });
-//     });
-// });
+        $router->get('/{transactionId}', function () {
+            // TODO: Routes this to the right controller
+        });
+    });
+});
 
-// $router->group(['middleware' => 'auth:admin'], function () use ($router) {
-//     $router->group(['prefix' => 'users'], function () use ($router) {
-//         $router->get('/', function () {
-//             // TODO: Routes this to the right controller
-//         });
-//     });
+$router->group(['middleware' => 'auth:admin'], function () use ($router) {
+    // $router->group(['prefix' => 'users'], function () use ($router) {
+    //     $router->get('/', function () {
+    //         // TODO: Routes this to the right controller
+    //     });
+    // });
 
-//     $router->group(['prefix' => 'books'], function () use ($router) {
-//         $router->post('/', function () {
-//             // TODO: Routes this to the right controller
-//         });
+    $router->group(['prefix' => 'books'], function () use ($router) {
+        $router->post('/', ['uses' => 'BookController@insert']);
 
-//         $router->put('/{bookId}', function () {
-//             // TODO: Routes this to the right controller
-//         });
+        $router->put('/{bookId}', ['uses' => 'BookController@update']);
 
-//         $router->delete('/{bookId}', function () {
-//             // TODO: Routes this to the right controller
-//         });
-//     });
+        $router->delete('/{bookId}', ['uses' => 'BookController@delete']);
+    });
 
 //     $router->group(['prefix' => 'transactions'], function () use ($router) {
 //         $router->put('/{transactionId}', function () {
@@ -98,4 +92,4 @@ $router->group(['prefix' => 'books'], function () use ($router) {
 //             // TODO: Routes this to the right controller
 //         });
 //     });
-// });
+});

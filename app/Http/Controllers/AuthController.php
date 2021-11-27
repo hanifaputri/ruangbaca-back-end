@@ -22,12 +22,12 @@ class AuthController extends Controller
     // pengaturan JWT
     private function jwt($user) {
         $payload =array(
-                'data' => $user,
-                'iat' => time(),
-                'exp' => time() + 60 * 60,
-                'role' => $user->role,
+            'data' => $user,
+            'iat' => time(),
+            'exp' => time() + 60 * 60,
+            'role' => $user->role,
         );
-            return JWT::encode($payload,env('JWT_KEY'),'HS256');
+        return JWT::encode($payload,env('JWT_KEY'),'HS256');
     }
 
     public function register(Request $request)
@@ -97,12 +97,5 @@ class AuthController extends Controller
                 'message'=>$e->getMessage()
             ], 500);
         }
-    }
-
-    public function test(){
-        return response()->json([
-            'success'=>true,
-            'message'=>'masuk'
-        ], 200);
     }
 }
