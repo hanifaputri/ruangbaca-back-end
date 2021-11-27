@@ -19,7 +19,7 @@ class CreateTransactions extends Migration
             $table->foreign('book_id')->references('id')->on('books');
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users');
-            $table->date('deadline');
+            $table->date('deadline')->nullable();
             $table->timestamps();
         });
     }
