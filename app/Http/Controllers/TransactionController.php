@@ -31,19 +31,17 @@ class TransactionController extends Controller
                             'name' => $transaction['name'],
                             'email' => $transaction['email']
                         ],
-                    'book' => [
-                        'title' => $transaction['title'],
-                        'author' => $transaction['author']
-                    ],
-                    'created_at' => $transaction['created_at'],
-                    'updated_at' => $transaction['updated_at']
+                        'book' => [
+                            'title' => $transaction['title'],
+                            'author' => $transaction['author']
+                        ]
                     ]
                 ], 200);
             } else {
                 return response()->json([
                     'success' => false,
                     'message' => 'Unable to retrieve transaction'
-                ], 404);
+                ], 403);
             }
         } catch (Throwable $e) {
             return response()->json([
@@ -68,19 +66,17 @@ class TransactionController extends Controller
                             'name' => $transaction['name'],
                             'email' => $transaction['email']
                         ],
-                    'book' => [
-                        'title' => $transaction['title'],
-                        'author' => $transaction['author']
-                    ],
-                    'created_at' => $transaction['created_at'],
-                    'updated_at' => $transaction['updated_at']
+                        'book' => [
+                            'title' => $transaction['title'],
+                            'author' => $transaction['author']
+                       ]
                     ]
                 ], 200);
             } else {
                 return response()->json([
                     'success' => false,
                     'message' => 'Unable to retrieve transaction'
-                ], 404);
+                ], 403);
             }
         } catch (Throwable $e) {
             return response()->json([
