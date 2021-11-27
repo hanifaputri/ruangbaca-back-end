@@ -26,12 +26,12 @@ class Authorization
         }
 
         $jwt = str_replace('Bearer ','',$jwt);
+
         $user = null;
         try {
             $user = JWT::decode($jwt,env('JWT_KEY'),['HS256']);
             // dd($user->data->id);
             // dd($user->data);
-
         } catch (BeforeValidException $bve) {
             return response()->json([
                 'success'=>false,
@@ -52,25 +52,29 @@ class Authorization
                 'success'=>false,
                 'message'=>'Terjadi kesalahan server'
             ], 500);
-        }
-        
-        if ($user && $this->hasRole($role, $user)){
+        }   
+
+        $id = $user->data->id;
+
+        if ($this->isUserExist($id)){
             $request->auth = $user->data;
-            $role = User::find($user->data->id)->role;
-            // dd($role);
-            $request->auth->role = $role;
+            // Add role to auth
+            $request->auth->role = $this->getRole($id);
             return $next($request);
             // var_dump($request->auth);
             // die();
         } else {
             return response()->json([
                 'success'=>false,
-                'message'=>'You are not allowed to access'
-            ], 403);
+                'message'=>'User not exist'
+            ], 404);
         }
     }
-    private function hasRole($role, $user){
-        return User::where('id', $user->data->id)->where('role', $role);
-        // dd($user->data->id);
+    private function getRole($id){
+        return User::find($id)->role;
+    }
+
+    private function isUserExist($id){
+        return User::where('id', $id)->exists();
     }
 }
