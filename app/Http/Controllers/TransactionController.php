@@ -19,40 +19,55 @@ class TransactionController extends Controller
         //
     }
 
-    public function getAllTransaction()
+    public function getAllTransaction(Request $request)
     {
-        $transaction = Transaction::join('book', 'transaction.book_id', '=', 'book.id')->join('user', 'transaction.user_id', '=', 'user.id')->get();
+        $role = $request->auth->role;
 
         try {
-            if ($transaction) {
+            $usersId = [];
+            if ($role == 'admin') {
+                $usersId = Transaction::pluck('id');
+            } else {
+                $usersId = Transaction::where('user_id', $request->auth->id)->pluck('id');
+            }
+
+            if (isset($usersId)){
+                // Retrieve user ids in a form of array
+                $data = [];
+                foreach($usersId as $id) {
+                    $transaction = Transaction::find($id);
+                    $user = Transaction::find($id)->user()->select(['name', 'email'])->get();
+                    $book = Transaction::find($id)->book()->select(['title', 'author'])->get();
+
+                    $item = [
+                        'id' => $id,
+                        'user' => $user,
+                        'book' => $book,
+                        'deadline' => $transaction->deadline,
+                        'created_at' => $transaction->created_at,
+                        'updated_at' => $transaction->updated_at,
+                    ];
+                    array_push($data, $item);
+                }
+                // die();
                 return response()->json([
                     'success' => true,
                     'message' => 'Transaction succesfully retrieved',
                     'data' => [
-                        'id' => $transaction['id'],
-                        'user' => [
-                            'name' => $transaction['name'],
-                            'email' => $transaction['email']
-                        ],
-                        'book' => [
-                            'title' => $transaction['title'],
-                            'author' => $transaction['author']
-                        ],
-                        'created_at' => $transaction['created_at'],
-                        'updated_at' => $transaction['updated_at']
+                        'transactions' => $data
                     ]
                 ], 200);
             } else {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Unable to retrieve transaction'
+                    'message' => 'Transaction not exists'
                 ], 404);
             }
-        } catch (Throwable $e) {
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Server error',
-            ]);
+                'message' => 'Terjadi kesalahan pada server: '
+            ], 500);
         }
     }
 
