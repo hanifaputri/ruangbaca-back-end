@@ -102,7 +102,7 @@ class UserController extends Controller
 
         // Update data by ID user
         try {
-            if ($request->auth->role == 'user' && $request->auth->id == $userId) {
+            if ($request->auth->id == $userId) {
                 $user->name = $request->input('name');
                 $user->email = $request->input('email');
                 $user->password = Hash::make($request->input('password'));
@@ -134,7 +134,7 @@ class UserController extends Controller
         
         // Delete data by ID user
         try {
-            if ($request->auth->role == 'user' && $request->auth->id == $userId) {
+            if ($request->auth->id == $userId) {
                 $user->delete();
                 return response()->json([
                     'success' => true,

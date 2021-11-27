@@ -69,6 +69,7 @@ class Authorization
             ], 403);
         }
     }
+    
     private function hasRole($role, $user){
         return User::where('id', $user->data->id)->where('role', $role);
         // dd($user->data->id);

@@ -31,12 +31,12 @@ class TransactionController extends Controller
                             'name' => $transaction['name'],
                             'email' => $transaction['email']
                         ],
-                        'book' => [
-                            'title' => $transaction['title'],
-                            'author' => $transaction['author']
-                        ],
-                        'created_at' => $transaction['created_at'],
-                        'updated_at' => $transaction['updated_at']
+                    'book' => [
+                        'title' => $transaction['title'],
+                        'author' => $transaction['author']
+                    ],
+                    'created_at' => $transaction['created_at'],
+                    'updated_at' => $transaction['updated_at']
                     ]
                 ], 200);
             } else {
@@ -48,8 +48,8 @@ class TransactionController extends Controller
         } catch (Throwable $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Server error',
-            ]);
+                'message' => 'Terjadi kesalahan pada server',
+            ], 500);
         }
     }
 
@@ -68,12 +68,12 @@ class TransactionController extends Controller
                             'name' => $transaction['name'],
                             'email' => $transaction['email']
                         ],
-                        'book' => [
-                            'title' => $transaction['title'],
-                            'author' => $transaction['author']
-                        ],
-                        'created_at' => $transaction['created_at'],
-                        'updated_at' => $transaction['updated_at']
+                    'book' => [
+                        'title' => $transaction['title'],
+                        'author' => $transaction['author']
+                    ],
+                    'created_at' => $transaction['created_at'],
+                    'updated_at' => $transaction['updated_at']
                     ]
                 ], 200);
             } else {
@@ -85,8 +85,8 @@ class TransactionController extends Controller
         } catch (Throwable $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Server error',
-            ]);
+                'message' => 'Terjadi kesalahan pada server',
+            ], 500);
         }
     }
 
@@ -117,8 +117,8 @@ class TransactionController extends Controller
         } catch (Throwable $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Server error',
-            ]);
+                'message' => 'Terjadi kesalahan pada server',
+            ], 500);
         }
     }
 
@@ -148,8 +148,8 @@ class TransactionController extends Controller
         } catch (Throwable $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Server error',
-            ]);
+                'message' => 'Terjadi kesalahan pada server',
+            ], 500);
         }
     }
 }
