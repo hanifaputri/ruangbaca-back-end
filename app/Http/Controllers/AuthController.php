@@ -35,18 +35,21 @@ class AuthController extends Controller
         $name = $request->input('name');
         $email = $request->input('email');
         $password = Hash::make($request->input('password'));
+        $role = $request->input('role');
 
         $validated = $this->validate($request, [
-            'name' => 'required',
-            'email' => 'required|email',
-            'password' => 'required',
+            'name'      => 'required',
+            'email'     => 'unique:users|required|email',
+            'password'  => 'required',
+            'role'      => 'in:Admin,User|required'
         ]);
 
         try {
             $register = User::create([
-                'name' => $name,
-                'email' => $email,
-                'password' => $password
+                'name'      => $name,
+                'email'     => $email,
+                'password'  => $password,
+                'role'      => $role
             ]);
             if($register){
                 return response()->json([
@@ -72,8 +75,8 @@ class AuthController extends Controller
 
     public function login(Request $request){
         $this->validate($request, [
-            'email'=>'required|string',
-            'password'=>'required|string'
+            'email'     =>'required|string',
+            'password'  =>'required|string'
         ]);
         try {
             $user = User::where('email', $request->email)->first();
