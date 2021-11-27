@@ -14,10 +14,11 @@ class CreateTransactions extends Migration
     public function up()
     {
         Schema::create('transactions', function (Blueprint $table) {
-            $table->id();
-            // This is where you type your code
-
-            $table->timestamps();
+            $table->id()->primary();
+            $table->integer('book_id')->unsigned();
+            $table->integer('user_id')->unsigned();
+            $table->date('deadline');
+            $table->dropTimestamps();
         });
     }
 
