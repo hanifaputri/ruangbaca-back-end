@@ -55,14 +55,29 @@ class Authorization
         }   
 
         $id = $user->data->id;
+        // dd($this->hasRole($id, $role));
+        // role = null
 
         if ($this->isUserExist($id)){
             $request->auth = $user->data;
-            // Add role to auth
+            // Append role to auth
             $request->auth->role = $this->getRole($id);
-            return $next($request);
-            // var_dump($request->auth);
-            // die();
+
+            if ($role) {
+                if ($this->hasRole($id, $role)){
+                    // var_dump($request->auth);
+                    // die();
+                    return $next($request);
+                } else {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Forbiden access'
+                    ], 403);
+                }
+            } else {
+                // Accept request if no specific parameter included
+                return $next($request);
+            }
         } else {
             return response()->json([
                 'success'=>false,
@@ -74,6 +89,10 @@ class Authorization
         return User::find($id)->role;
     }
 
+    private function hasRole($id, $role){
+        return User::where('id', $id)->where('role', $role)->exists();
+    }
+    
     private function isUserExist($id){
         return User::where('id', $id)->exists();
     }
