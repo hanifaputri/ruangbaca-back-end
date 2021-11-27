@@ -26,6 +26,7 @@ class Book extends Model
      */
     protected $hidden = [
         // TODO: Insert your hidden fields
+        'created_at', 'updated_at', 'deleted_at'
     ];
 
     /**
