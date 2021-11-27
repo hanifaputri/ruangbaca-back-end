@@ -37,7 +37,7 @@ $router->group(['prefix' => 'books'], function () use ($router) {
 
 $router->group(['middleware' => 'auth'], function () use ($router) {
     $router->group(['prefix' => 'users'], function () use ($router) {
-        $router->get('/{userId}', ['uses' => 'UserController@getUser']);
+        $router->get('/{userId}', ['uses' => 'UserController@getUserById']);
 
         $router->put('/{userId}', ['uses' => 'UserController@updateUser']);
 
@@ -57,7 +57,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
 
 $router->group(['middleware' => 'auth:admin'], function () use ($router) {
     $router->group(['prefix' => 'users'], function () use ($router) {
-        $router->get('/{userId}', ['uses' => 'UserController@index']);
+        $router->get('/', ['uses' => 'UserController@getUserAll']);
     });
 
     $router->group(['prefix' => 'books'], function () use ($router) {
