@@ -40,9 +40,11 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
     });
 
     $router->group(['prefix' => 'transactions'], function () use ($router) {
-        $router->get('/', ['transaction' => 'TransactionController@getAllTransaction']);
+        $router->get('/test', ['uses' => 'TransactionController@test']);
+        
+        $router->get('/', ['uses' => 'TransactionController@getAllTransaction']);
 
-        $router->get('/{transactionId}', ['transaction' => 'TransactionController@getTransactionId']);
+        $router->get('/{transactionId}', ['uses' => 'TransactionController@getTransactionId']);
     });
 });
 
