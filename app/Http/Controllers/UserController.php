@@ -29,7 +29,7 @@ class UserController extends Controller
                     'success' => true,
                     'message' => 'User found',
                     'data' => [
-                        'user' => $user
+                        'users' => $user
                     ]
                 ], 200);
             } else {
@@ -108,12 +108,10 @@ class UserController extends Controller
         try {
             if ($request->auth->id == $userId) {
                 $user->name = $request->input('name');
-                $user->email = $request->input('email');
-                $user->password = Hash::make($request->input('password'));
                 $user->save();
                 return response()->json([
                     'success' => true,
-                    'message' => 'Update data user succeeded',
+                    'message' => 'Successfully update data user',
                     'data' => [
                         'user' => $user
                     ]
