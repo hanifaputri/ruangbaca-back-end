@@ -35,4 +35,14 @@ class Book extends Model
      * @var array
      */
     protected $dates = ['deleted_at'];
+
+    /**
+     * Define relationship betweeen books and transactions
+     * 
+     * 
+     */
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
+    }
 }

@@ -19,73 +19,109 @@ class TransactionController extends Controller
         //
     }
 
-    public function getAllTransaction()
+    public function getAllTransaction(Request $request)
     {
-        $transaction = Transaction::join('book', 'transaction.book_id', '=', 'book.id')->join('user', 'transaction.user_id', '=', 'user.id')->get();
+        $role = $request->auth->role;
 
         try {
-            if ($transaction) {
+            $usersId = array();
+            if ($role == 'admin') {
+                $usersId = Transaction::pluck('id');
+            } else {
+                $usersId = Transaction::where('user_id', $request->auth->id)->pluck('id');
+            }
+            // dd(count($usersId));
+
+            if (count($usersId)>0){
+                // Retrieve user ids in a form of array
+                $data = array(); 
+
+                // Method 1: Directly define variable
+                foreach($usersId as $id) {
+                    $transaction = Transaction::find($id);
+                    // $user = Transaction::find($id)->user()->select(['name', 'email'])->get();
+                    // $book = Transaction::find($id)->book()->select(['title', 'author'])->get();
+
+                    $item = [
+                        'id' => $id,
+                        'user' => [
+                            'name' => $transaction->user->name,
+                            'email' => $transaction->user->email,
+                        ],
+                        'book' => [
+                            'title' => $transaction->book->title,
+                            'author' => $transaction->book->author
+                        ],
+                        'deadline' => $transaction->deadline,
+                        'created_at' => $transaction->created_at,
+                        'updated_at' => $transaction->updated_at,
+                    ];
+                    array_push($data, $item);
+                }
+                // die();
                 return response()->json([
                     'success' => true,
                     'message' => 'Transaction succesfully retrieved',
                     'data' => [
-                        'id' => $transaction['id'],
-                        'user' => [
-                            'name' => $transaction['name'],
-                            'email' => $transaction['email']
-                        ],
-                        'book' => [
-                            'title' => $transaction['title'],
-                            'author' => $transaction['author']
-                        ]
+                        'transactions' => $data
                     ]
                 ], 200);
             } else {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Unable to retrieve transaction'
-                ], 403);
+                    'message' => 'No transaction found'
+                ], 404);
             }
-        } catch (Throwable $e) {
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan pada server',
+                'message' => 'Terjadi kesalahan pada server: '
             ], 500);
         }
     }
 
-    public function getTransactionId($transactionId)
+    public function getTransactionId(Request $request, $transactionId)
     {
-        $transaction = Transaction::join('book', 'transaction.book_id', '=', 'book.id')->join('user', 'transaction.user_id', '=', 'user.id')->where('id', $transactionId)->first();
+        $transaction = Transaction::where('id', $transactionId)->first();
 
         try {
             if ($transaction) {
+                // Method 2: Predefined the variables
+                $user = Transaction::find($transactionId)->user()->select(
+                    [
+                    // Define which attribute will be returned in user data
+                        'name', 'email'
+                    ])->get();
+                    
+                $book = Transaction::find($transactionId)->book()->select(
+                    [
+                    // Define which attribute will be returned in book data
+                        'title', 'author'
+                    ])->get();
+
                 return response()->json([
                     'success' => true,
                     'message' => 'Transaction succesfully retrieved',
                     'data' => [
-                        'id' => $transaction['id'],
-                        'user' => [
-                            'name' => $transaction['name'],
-                            'email' => $transaction['email']
-                        ],
-                        'book' => [
-                            'title' => $transaction['title'],
-                            'author' => $transaction['author']
-                       ]
+                        'id' => $transactionId,
+                        'user' => $user,
+                        'book' => $book,
+                        'deadline' => $transaction->deadline,
+                        'created_at' => $transaction->created_at,
+                        'updated_at' => $transaction->updated_at,
                     ]
                 ], 200);
             } else {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Unable to retrieve transaction'
-                ], 403);
+                    'message' => 'Transactionn not found'
+                ], 404);
             }
-        } catch (Throwable $e) {
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan pada server',
-            ], 500);
+                'message' => 'Terjadi kesalahan server: ' . $e.getMessage()
+            ]);
         }
     }
 
