@@ -24,25 +24,34 @@ class TransactionController extends Controller
         $role = $request->auth->role;
 
         try {
-            $usersId = [];
+            $usersId = array();
             if ($role == 'admin') {
                 $usersId = Transaction::pluck('id');
             } else {
                 $usersId = Transaction::where('user_id', $request->auth->id)->pluck('id');
             }
+            // dd(count($usersId));
 
-            if (isset($usersId)){
+            if (count($usersId)>0){
                 // Retrieve user ids in a form of array
-                $data = [];
+                $data = array(); 
+
+                // Method 1: Directly define variable
                 foreach($usersId as $id) {
                     $transaction = Transaction::find($id);
-                    $user = Transaction::find($id)->user()->select(['name', 'email'])->get();
-                    $book = Transaction::find($id)->book()->select(['title', 'author'])->get();
+                    // $user = Transaction::find($id)->user()->select(['name', 'email'])->get();
+                    // $book = Transaction::find($id)->book()->select(['title', 'author'])->get();
 
                     $item = [
                         'id' => $id,
-                        'user' => $user,
-                        'book' => $book,
+                        'user' => [
+                            'name' => $transaction->user->name,
+                            'email' => $transaction->user->email,
+                        ],
+                        'book' => [
+                            'title' => $transaction->book->title,
+                            'author' => $transaction->book->author
+                        ],
                         'deadline' => $transaction->deadline,
                         'created_at' => $transaction->created_at,
                         'updated_at' => $transaction->updated_at,
@@ -60,7 +69,7 @@ class TransactionController extends Controller
             } else {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Transaction not exists'
+                    'message' => 'No transaction found'
                 ], 404);
             }
         } catch (\Exception $e) {
@@ -77,6 +86,7 @@ class TransactionController extends Controller
 
         try {
             if ($transaction) {
+                // Method 2: Predefined the variables
                 $user = Transaction::find($transactionId)->user()->select(
                     [
                     // Define which attribute will be returned in user data
