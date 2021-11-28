@@ -6,6 +6,7 @@ use App\Models\Book;
 use App\Models\User;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class TransactionController extends Controller
 {
@@ -22,7 +23,7 @@ class TransactionController extends Controller
     public function getAllTransaction(Request $request)
     {
         $role = $request->auth->role;
-
+        
         try {
             $usersId = array();
             if ($role == 'admin') {
@@ -82,56 +83,70 @@ class TransactionController extends Controller
 
     public function getTransactionId(Request $request, $transactionId)
     {
-        $transaction = Transaction::where('id', $transactionId)->first();
-
+        $transaction = Transaction::find($transactionId);
         try {
             if ($transaction) {
-                // Method 2: Predefined the variables
-                $user = Transaction::find($transactionId)->user()->select(
-                    [
-                    // Define which attribute will be returned in user data
-                        'name', 'email'
-                    ])->get();
-                    
-                $book = Transaction::find($transactionId)->book()->select(
-                    [
-                    // Define which attribute will be returned in book data
-                        'title', 'author'
-                    ])->get();
-
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Transaction succesfully retrieved',
-                    'data' => [
-                        'id' => $transactionId,
-                        'user' => $user,
-                        'book' => $book,
-                        'deadline' => $transaction->deadline,
-                        'created_at' => $transaction->created_at,
-                        'updated_at' => $transaction->updated_at,
-                    ]
-                ], 200);
+                if ($request->auth->id == $transaction->user_id || $request->auth->role == 'admin'){
+                    // Method 2: Predefined the variables
+                    // $user = $transaction->user()->select(['name', 'email'])->get();
+                    // $book = $transaction->book()->select(['title', 'author'])->get();
+    
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Transaction succesfully retrieved',
+                        'data' => [
+                            'transaction' => [
+                                'user' => [
+                                    'name' => $transaction->user->name,
+                                    'email' => $transaction->user->email,
+                                ],
+                                'book' => [
+                                    'title' => $transaction->book->title,
+                                    'author' => $transaction->book->author,
+                                    'description' => $transaction->book->description,
+                                    'synopsis' => $transaction->book->synopsis
+                                ],
+                                'deadline' => $transaction->deadline,
+                                'created_at' => $transaction->created_at,
+                                'updated_at' => $transaction->updated_at,
+                            ]
+                        ]
+                    ], 200);
+                } else {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Access denied'
+                    ], 403);
+                }
             } else {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Transactionn not found'
+                    'message' => 'Transaction not found'
                 ], 404);
             }
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan server: ' . $e.getMessage()
+                'message' => 'Terjadi kesalahan server: ' . $e->getMessage()
             ]);
         }
     }
 
     public function insert(Request $request)
     {
+        // dd(date('Y-m-d H:i:s', time() + 7 * 24 * 60 * 60));
         $id = $request->input('book_id');
 
-        $validated = $this->validate($request, [
+        $val_required = Validator::make($request->all(), [
             'book_id' => 'integer|required'
         ]);
+
+        if ($val_required->fails()){
+            return response()->json([
+                'success' => false,
+                'message' => 'Field should not be empty'
+            ], 400);
+        }
 
         try {
             $book = Book::where('id', $id)->first();
@@ -151,8 +166,18 @@ class TransactionController extends Controller
                     return response()->json([
                         'success'   => true,
                         'message'   => 'Transaction successfully added',
-                        'data'      => $transaction
-                    ], 200);
+                        'data'      => [
+                            'transaction' => [
+                                'book' => [
+                                    'title' => $transaction->book->title,
+                                    'author'=> $transaction->book->author
+                                ],
+                                'deadline' => $transaction->deadline,
+                                'created_at' => $transaction->created_at,
+                                'updated_at' => $transaction->updated_at
+                            ],
+                        ],
+                    ], 201);
                 } else {
                     return response()->json([
                         'success'   => false,
@@ -163,7 +188,7 @@ class TransactionController extends Controller
                 return response()->json([
                     'success'   => false,
                     'message'   => 'Book not found'
-                ], 404);
+                ], 400);
             }
         } catch (\Exception $e) {
             return response()->json([
@@ -175,7 +200,7 @@ class TransactionController extends Controller
 
     public function update(Request $request, $transactionId)
     {
-        $transaction = Transaction::where('id', $transactionId)->first();
+        $transaction = Transaction::find($transactionId);
 
         try {
             if ($transaction) {
@@ -195,8 +220,22 @@ class TransactionController extends Controller
                     'success' => true,
                     'message' => 'Book has succesfully returned',
                     'data' => [
-                        'transaction' => $transaction
-                    ]
+                        'transaction' => [
+                            'user' => [
+                                'name' => $transaction->user->name,
+                                'email' => $transaction->user->email
+                            ],
+                            'book' => [
+                                'title' => $transaction->book->title,
+                                'author' => $transaction->book->author,
+                                'description' => $transaction->book->description,
+                                'synopsis' => $transaction->book->synopsis
+                            ],
+                            'deadline' => $transaction->deadline,
+                            'created_at' => $transaction->created_at,
+                            'updated_at' => $transaction->updated_at
+                        ],
+                    ],
                 ], 200);
             } else {
                 return response()->json([
