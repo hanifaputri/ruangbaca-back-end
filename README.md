@@ -1,5 +1,11 @@
 ## Projek Akhir PemIn
 
+### Kelompok
+1. Alizza Iman Raddin (195150700111014)
+2. Ghina Zahirah (195150700111018)
+3. Hanifa Putri Rahima (195150700111032)
+4. Ni Luh Mas Elma Yuniawati (632101170003)
+
 ### How to run it?
 
 1. Download this repository, you can download it by cloning it or download as a zip
