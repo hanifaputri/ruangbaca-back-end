@@ -22,6 +22,5 @@ class Transaction extends Model
      * @var array
      */
     protected $hidden = [
-        'id'
     ];
 }

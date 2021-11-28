@@ -62,12 +62,12 @@ $router->group(['middleware' => 'auth:admin'], function () use ($router) {
     });
 
     $router->group(['prefix' => 'transactions'], function () use ($router) {
-        $router->put('/{transactionId}', ['transaction' => 'TransactionController@update']);
+        $router->put('/{transactionId}', ['uses' => 'TransactionController@update']);
     });
 });
 
 $router->group(['middleware' => 'auth:user'], function () use ($router) {
     $router->group(['prefix' => 'transactions'], function () use ($router) {
-        $router->post('/', ['transaction' => 'TransactionController@insert']);
+        $router->post('/', ['uses' => 'TransactionController@insert']);
     });
 });

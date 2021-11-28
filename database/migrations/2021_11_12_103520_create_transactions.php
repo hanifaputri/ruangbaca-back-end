@@ -14,14 +14,16 @@ class CreateTransactions extends Migration
     public function up()
     {
         Schema::create('transactions', function (Blueprint $table) {
-            $table->id()->primary();
-            $table->integer('book_id')->unsigned();
-            $table->integer('user_id')->unsigned();
-            $table->date('deadline');
-            $table->dropTimestamps();
+            $table->id()->bigIncrements();
+            $table->unsignedBigInteger('book_id');
+            $table->foreign('book_id')->references('id')->on('books');
+            $table->unsignedBigInteger('user_id');
+            $table->foreign('user_id')->references('id')->on('users');
+            $table->date('deadline')->nullable();
+            $table->timestamps();
         });
     }
-
+    
     /**
      * Reverse the migrations.
      *
