@@ -37,14 +37,7 @@ class AuthController extends Controller
         $name = $request->input('name');
         $email = $request->input('email');
         $password = Hash::make($request->input('password'));
-        $role = $request->input('role');
-
-       /* $validated = $this->validate($request, [
-            'name'      => 'required',
-            'email'     => 'unique:users|required|email',
-            'password'  => 'required',
-            'role'      => 'in:Admin,User|required'
-        ]);*/
+        $role = $request->input('role') ?? 'User';
 
         $val_required = Validator::make($request->all(),[
             'name'      => 'required',
@@ -59,36 +52,39 @@ class AuthController extends Controller
         ],400);}
 
         try {
-            $register = User::create([
-                'name'      => $name,
-                'email'     => $email,
-                'password'  => $password,
-                'role'      => $role
-            ]);
             $user = User::where('email', $request->email)->first();
-            if ($user){
-                return response()->json([
-                    'success'=>false,
-                    'message'=>'Email already existed'
-                ], 400);
-            };
-            if($register){
+            if (!$user){
+                $register = User::create([
+                    'name'      => $name,
+                    'email'     => $email,
+                    'password'  => $password,
+                    'role'      => $role
+                ]);
+
+                if($register){
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Register Success!',
+                        'data' => ['token'=>$this->jwt($register),]
+                    ], 201);
+                } else {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Register Failed!'
+                    ], 400);
+                }
+            } else {
                 return response()->json([
                     'success' => true,
                     'message' => 'Register Success!',
                     'data' => ['token'=>$this->jwt($register),]
                 ], 201);
-            } else {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Register Failed!'
-                ], 400);
-            }
+            };
         } catch(\Exception $e){
             return response()->json([
                 'success'=>false,
-                'message'=>$e->getMessage()
-            ], 500);
+                'message'=>'Email already exists'
+            ], 400);
         }
     }
 
@@ -99,12 +95,13 @@ class AuthController extends Controller
         ]);
         try {
             $user = User::where('email', $request->email)->first();
-            if ($user){
+            if (!$user){
                 return response()->json([
                     'success'=>false,
                     'message'=>'Email not found!'
                 ], 404);
             };
+
             if (Hash::check($request->password,$user->password)){
                 return response()->json([
                     'success'=>true,
