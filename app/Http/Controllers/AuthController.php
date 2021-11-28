@@ -7,6 +7,7 @@ use Firebase\JWT\JWT;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
@@ -22,7 +23,9 @@ class AuthController extends Controller
     // pengaturan JWT
     private function jwt($user) {
         $payload =array(
-            'data' => $user,
+            'sub' => $user->email,
+            'iss' => 'http://localhost:8000/',
+            'aud' => 'http://localhost:8000/',
             'iat' => time(),
             'exp' => time() + 60 * 60,
             'role' => $user->role,
@@ -35,14 +38,26 @@ class AuthController extends Controller
         $name = $request->input('name');
         $email = $request->input('email');
         $password = Hash::make($request->input('password'));
-        $role = $request->input('role');
+        $role = $request->input('role') ?? 'User';
+        
+        // Role validation
+        $val_role = Validator::make($request->all(), [
+            'role'      => 'in:Admin,User'
+        ]);
 
-        $validated = $this->validate($request, [
+        // Empty field validation
+        $val_required = Validator::make($request->all(), [
             'name'      => 'required',
             'email'     => 'unique:users|required|email',
             'password'  => 'required',
-            'role'      => 'in:Admin,User|required'
         ]);
+
+        if ($val_required->fails()){
+            return response()->json([
+                'success' => false,
+                'message' => 'Field should not be empty'
+            ], 400);
+        }
 
         try {
             $register = User::create([

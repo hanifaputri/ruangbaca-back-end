@@ -19,10 +19,10 @@ class CreateBooks extends Migration
 
             $table->id();
             $table->string('title');
-            $table->string('description');
+            $table->text('description');
             $table->string('author');
             $table->integer('year');
-            $table->string('synopsis');
+            $table->text('synopsis');
             $table->integer('stock');
             $table->timestamps();
         });

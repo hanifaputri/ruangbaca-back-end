@@ -21,17 +21,19 @@ class Authorization
         if (!$jwt) {
             return response()->json([
                 'success'=>false,
-                'message'=>'JWT Tidak ada'
-            ], 403);
+                'message'=>'Token required'
+            ], 401);
         }
 
         $jwt = str_replace('Bearer ','',$jwt);
 
         $user = null;
         try {
-            $user = JWT::decode($jwt,env('JWT_KEY'),['HS256']);
+            $payload = JWT::decode($jwt,env('JWT_KEY'),['HS256']);
+            // dd($payload);
+            $user = User::where('email', $payload->sub)->first();
             // dd($user->data->id);
-            // dd($user->data);
+            // dd($user);
         } catch (\Firebase\JWT\BeforeValidException $bve) {
             return response()->json([
                 'success'=>false,
@@ -54,12 +56,14 @@ class Authorization
             ], $e->getStatusCode());
         }   
 
-        $id = $user->data->id;
+        $id = $user->id;
+        // dd($id);
         // dd($this->hasRole($id, $role));
         // role = null
 
         if ($this->isUserExist($id)){
-            $request->auth = $user->data;
+            $request->auth = $user;
+            // dd($request->auth);
             // Append role to auth
             $request->auth->role = $this->getRole($id);
 
