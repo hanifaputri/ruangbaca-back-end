@@ -14,13 +14,16 @@ class CreateTransactions extends Migration
     public function up()
     {
         Schema::create('transactions', function (Blueprint $table) {
-            $table->id()->bigIncrements();
-            $table->unsignedBigInteger('book_id');
-            $table->foreign('book_id')->references('id')->on('books');
-            $table->unsignedBigInteger('user_id');
-            $table->foreign('user_id')->references('id')->on('users');
+            $table->bigIncrements('id');
+            $table->foreignId('book_id')->constrained('books');
+            $table->foreignId('publisher_id')->constrained('publishers');
+            $table->foreignId('user_id')->constrained('users');
             $table->date('deadline')->nullable();
+            $table->enum('status',['Sedang Dipinjam, Dikembalikan, Terlambat']);
             $table->timestamps();
+
+            // Enable Soft Deletes
+            $table->softDeletes();
         });
     }
     
@@ -32,5 +35,6 @@ class CreateTransactions extends Migration
     public function down()
     {
         Schema::dropIfExists('transactions');
+        $table->dropSoftDeletes();
     }
 }
