@@ -14,8 +14,7 @@
  */
 
 $router->get('/', function () use ($router) {
-    return env('JWT_KEY');
-    // return $router->app->version();
+    return $router->app->version();
 });
 
 /*
@@ -132,58 +131,26 @@ $router->group(['middleware' => 'auth:admin'], function () use ($router) {
     });
 });
 
+/*
+|--------------------------------------------------------------------------
+| Transaction
+|--------------------------------------------------------------------------
+|*/
 
+$router->group(['middleware' => 'auth'], function () use ($router) {
+    $router->group(['prefix' => 'transactions'], function () use ($router) {
+        $router->get('/', ['uses' => 'TransactionController@index']);
+        $router->get('/{id}', ['uses' => 'TransactionController@get']);
+        $router->post('/', ['uses' => 'TransactionController@insert']);
+    });
+});
 
-    
-// $router->group(['prefix' => 'books'], function () use ($router) {
-//     $router->get('/', ['uses' => 'BookController@getAllBooks']);
+$router->group(['middleware' => 'auth:admin'], function () use ($router) {
+    $router->group(['prefix' => 'transactions'], function () use ($router) {
+        $router->put('/{id}', ['uses' => 'TransactionController@return']);
+    });
+});
 
-//     $router->get('/{bookId}', ['uses' => 'BookController@getBookById']);
-// });
-
-// $router->group(['middleware' => 'auth'], function () use ($router) {
-//     $router->group(['prefix' => 'users'], function () use ($router) {
-//         $router->get('/{userId}', ['uses' => 'UserController@getUserById']);
-
-//         $router->put('/{userId}', ['uses' => 'UserController@updateUser']);
-
-//         $router->delete('/{userId}', ['uses' => 'UserController@destroy']);
-//     });
-
-//     $router->group(['prefix' => 'transactions'], function () use ($router) {
-//         $router->get('/test', ['uses' => 'TransactionController@test']);
-        
-//         $router->get('/', ['uses' => 'TransactionController@getAllTransaction']);
-
-//         $router->get('/{transactionId}', ['uses' => 'TransactionController@getTransactionId']);
-//     });
-// });
-
-// $router->group(['middleware' => 'auth:admin'], function () use ($router) {
-//     $router->group(['prefix' => 'users'], function () use ($router) {
-//         $router->get('/', ['uses' => 'UserController@getUserAll']);
-//     });
-
-//     $router->group(['prefix' => 'books'], function () use ($router) {
-//         $router->post('/', ['uses' => 'BookController@insert']);
-
-//         $router->put('/{bookId}', ['uses' => 'BookController@update']);
-
-//         $router->delete('/{bookId}', ['uses' => 'BookController@delete']);
-
-//         $router->post('/restore', ['uses' => 'BookController@restore']);
-//     });
-
-//     $router->group(['prefix' => 'transactions'], function () use ($router) {
-//         $router->put('/{transactionId}', ['uses' => 'TransactionController@update']);
-//     });
-// });
-
-// $router->group(['middleware' => 'auth:user'], function () use ($router) {
-//     $router->group(['prefix' => 'transactions'], function () use ($router) {
-//         $router->post('/', ['uses' => 'TransactionController@insert']);
-//     });
-// });
 // $router->group(['middleware' => 'auth:user'], function () use ($router) {
 //     $router->group(['prefix' => 'transactions'], function () use ($router) {
 //         $router->post('/', ['uses' => 'TransactionController@insert']);
