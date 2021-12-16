@@ -70,12 +70,33 @@ $router->group(['middleware' => 'auth:admin'], function () use ($router) {
 
 /*
 |--------------------------------------------------------------------------
+| Language
+|--------------------------------------------------------------------------
+|*/
+
+$router->group(['prefix' => 'languages'], function () use ($router) {
+    $router->get('/', ['uses' => 'LanguageController@getLanguageAll']);
+});
+
+// Admin only
+$router->group(['middleware' => 'auth:admin'], function () use ($router) {
+    $router->group(['prefix' => 'languages'], function () use ($router) {
+        $router->get('/{id}', ['uses' => 'LanguageController@getLanguageById']);
+        $router->post('/', ['uses' => 'LanguageController@insert']);
+        $router->put('/{id}', ['uses' => 'LanguageController@update']);
+        $router->delete('/{id}', ['uses' => 'LanguageController@delete']);
+    });
+});
+
+/*
+|--------------------------------------------------------------------------
 | Book
 |--------------------------------------------------------------------------
 |*/
 
 $router->group(['prefix' => 'books'], function () use ($router) {
     $router->get('/', ['uses' => 'BookController@index']);
+    $router->get('/search', ['uses' => 'BookController@getByKeyword']);
     $router->get('/{id}', ['uses' => 'BookController@get']);
 });
 
@@ -89,6 +110,7 @@ $router->group(['middleware' => 'auth:admin'], function () use ($router) {
         $router->post('/{id}', ['uses' => 'BookController@restore']);
     });
 });
+
 
 // $router->group(['prefix' => 'books'], function () use ($router) {
 //     $router->get('/', ['uses' => 'BookController@getAllBooks']);
@@ -142,25 +164,5 @@ $router->group(['middleware' => 'auth:admin'], function () use ($router) {
 $router->group(['middleware' => 'auth:user'], function () use ($router) {
     $router->group(['prefix' => 'transactions'], function () use ($router) {
         $router->post('/', ['uses' => 'TransactionController@insert']);
-    });
-});
-
-/*
-|--------------------------------------------------------------------------
-| Book
-|--------------------------------------------------------------------------
-|*/
-
-$router->group(['prefix' => 'languages'], function () use ($router) {
-    $router->get('/', ['uses' => 'LanguageController@getLanguageAll']);
-});
-
-// Admin only
-$router->group(['middleware' => 'auth:admin'], function () use ($router) {
-    $router->group(['prefix' => 'languages'], function () use ($router) {
-        $router->get('/{id}', ['uses' => 'LanguageController@getLanguageById']);
-        $router->post('/', ['uses' => 'LanguageController@insertLanguage']);
-        $router->put('/{id}', ['uses' => 'LanguageController@updateLanguage']);
-        $router->delete('/{id}', ['uses' => 'LanguageController@deleteLanguage']);
     });
 });
