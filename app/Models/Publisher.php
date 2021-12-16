@@ -32,7 +32,7 @@ class Publisher extends Model
     ];
 
     /**
-     * Get category  associated with transaction
+     * Get publisher  associated with transaction
      * 
      */
     public function book()
