@@ -14,9 +14,15 @@
  */
 
 $router->get('/', function () use ($router) {
-    return $router->app->version();
+    return env('JWT_KEY');
+    // return $router->app->version();
 });
 
+/*
+|--------------------------------------------------------------------------
+| Authenication
+|--------------------------------------------------------------------------
+|*/
 $router->group(['prefix' => 'auth'], function () use ($router) {
     $router->post('/register', ['uses' => 'AuthController@register']);
     $router->post('/login', ['uses' => 'AuthController@login']);
