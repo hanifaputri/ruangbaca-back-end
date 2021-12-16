@@ -17,18 +17,25 @@ class BookController extends Controller
         //
     }
 
-    public function getAllBooks()
-    {
-        $book = Book::all();
+    public function index()
+    {   
+        $books = Book::all();
 
         try {
-            if($book){
+            if($books){
                 return response()->json([
                     'success' => true,
                     'message' => 'Book succesfully retrieved',
-                    'data' => [
-                        'books' => $book
-                    ]
+                    'data' => 
+                        [
+                            'id' => $book->id,
+                            'isbn' => $book->isbn,
+                            'img_url' => $book->img_url,
+                            'author' => $book->author,
+                            'publisher' => $book->publisher->publisher,
+                            'category' => $book->category->category,
+                            'language' => $book->language->language
+                        ]
                 ], 200);
             }else {
                 return response()->json([
@@ -39,23 +46,21 @@ class BookController extends Controller
         } catch (\Exception $e){
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan pada server',
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
 
-    public function getBookById($bookId)
+    public function get($id)
     {
-        $book = Book::where('id', $bookId)->first();
+        $book = Book::where('id', $id)->first();
 
         try {
             if($book){
                 return response()->json([
                     'success' => true,
                     'message' => 'Book succesfully retrieved',
-                    'data' => [
-                        'book' => $book
-                    ]
+                    'data' => $book
                 ], 200);
             } else {
                 return response()->json([
@@ -66,7 +71,7 @@ class BookController extends Controller
         } catch (\Exception $e){
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan pada server',
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
@@ -74,73 +79,54 @@ class BookController extends Controller
     public function insert(Request $request){
         $input = $request->input();
 
-        $val_required = Validator::make($request->all(), [
+        $this->validate($request, [
+            'isbn'          =>'required|max:15|unique:books',
             'title'         =>'required',
+            'img_url'       =>'required|max:255',
             'author'        =>'required',
-            'description'   =>'required',
-            'synopsis'      =>'required',
-            'year'          =>'required|integer',
-            'stock'         =>'required|integer',
-        ]);
-
-        if ($val_required->fails()){
-            return response()->json([
-                'success' => false,
-                'message' => 'Field should not be empty'
-            ], 400);
-        }
+            'publisher_id'  =>'required|exists:publishers,id',
+            'category_id'   =>'required|exists:categories,id',
+            'language_id'   =>'required|exists:languages,id'
+        ],['isbn.unique'   => 'Book already exist']);
 
         try {
             $book = Book::create([
+                'isbn'          => $input['isbn'],
                 'title'         => $input['title'],
-                'description'   => $input['description'],
+                'img_url'       => $input['img_url'],
                 'author'        => $input['author'],
-                'year'          => $input['year'],
-                'synopsis'      => $input['synopsis'],
-                'stock'         => $input['stock']
+                'publisher_id'  => $input['publisher_id'],
+                'category_id'   => $input['category_id'],
+                'language_id'   => $input['language_id']
             ]);
 
             return response()->json([
                 'success'   => true,
                 'message'   => 'Book successfully added',
-                'data'      => [
-                    'book' => $book
-                ]
+                'data'      => $book
             ], 201);
         } catch (\Exception $e){
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan pada server',
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
 
-    public function update(Request $request, $bookId)
+    public function update(Request $request, $id)
     {
-        $book = Book::where('id', $bookId)->first();
-
-        $val = Validator::make($request->all(), [
-            'year'          =>'integer',
-            'stock'         =>'integer',
-        ]);
+        $book = Book::where('id', $id)->first();
 
         try {
             if ($book) {
-                // $book->title = $request->input('title');
-                // $book->description = $request->input('description');
-                // $book->author = $request->input('author');
-                // $book->year = (int) $request->input('year');
-                // $book->synopsis = $request->input('synopsis');
-                // $book->stock = (int) $request->input('stock');
+                $this->validate($request, ['isbn'=>'max:15|unique:books'],['isbn.unique'   => 'Book already exist']);
 
                 $book->fill($request->input())->save();
 
                 return response()->json([
                     'success' => true,
                     'message' => 'Data succesfully updated',
-                    'data' => [
-                        'book' => $book
-                    ]
+                    'data' => $book
                 ], 200);
             } else {
                 return response()->json([
@@ -156,21 +142,18 @@ class BookController extends Controller
         }
     }
 
-    public function delete(Request $request, $bookId)
+    public function delete(Request $request, $id)
     {
-        $book = Book::where('id', $bookId)->first();
+        $book = Book::where('id', $id)->first();
         
         try {
             if ($book){
                 $book->delete();
 
                 if($book->trashed()) {
-                    $deletedBook = Book::onlyTrashed()->where('id', $bookId)->get();
-
                     return response()->json([
                         'success' => true,
-                        'message' => 'Data succesfully deleted',
-                        'data' => $deletedBook
+                        'message' => 'Data succesfully deleted'
                     ], 200);
                 } else {
                     return response()->json([
@@ -194,13 +177,13 @@ class BookController extends Controller
 
     public function restore(Request $request)
     {
-        $bookId = $request->input('id');
-        $book = Book::onlyTrashed()->where('id', $bookId);
-
+        $id = $request->input('id');
+        $book = Book::onlyTrashed()->where('id', $id);
+        // dd($book->first());
         try {
-            if ($book){
+            if ($book->first()){
                 $book->restore();
-                $restoredBook = Book::where('id', $bookId)->get();
+                $restoredBook = Book::where('id', $id)->get();
 
                 return response()->json([
                     'success' => true,
@@ -216,10 +199,8 @@ class BookController extends Controller
         } catch (\Exception $e){
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan pada server',
-            ],$e->getStatusCode());
+                'message' => $e->getMessage(),
+            ],500);
         }
     }
-
-    // TODO: Create book logic
 }
