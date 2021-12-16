@@ -28,6 +28,32 @@ $router->group(['prefix' => 'auth'], function () use ($router) {
     $router->post('/login', ['uses' => 'AuthController@login']);
 });
 
+/*
+|--------------------------------------------------------------------------
+| Category
+|--------------------------------------------------------------------------
+|*/
+
+$router->group(['middleware' => 'auth'], function () use ($router) {
+    $router->group(['prefix' => 'categories'], function () use ($router) {
+        $router->get('/', ['uses' => 'CategoryController@get']);
+    });
+});
+
+// Admin only
+$router->group(['middleware' => 'auth:admin'], function () use ($router) {
+    $router->group(['prefix' => 'categories'], function () use ($router) {
+        $router->post('/', ['uses' => 'CategoryController@insert']);
+        $router->put('/{id}', ['uses' => 'CategoryController@update']);
+        $router->delete('/{id}', ['uses' => 'CategoryController@delete']);
+    });
+});
+
+/*
+|--------------------------------------------------------------------------
+| Book
+|--------------------------------------------------------------------------
+|*/
 $router->group(['prefix' => 'books'], function () use ($router) {
     $router->get('/', ['uses' => 'BookController@getAllBooks']);
 
