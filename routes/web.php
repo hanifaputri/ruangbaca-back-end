@@ -34,10 +34,8 @@ $router->group(['prefix' => 'auth'], function () use ($router) {
 |--------------------------------------------------------------------------
 |*/
 
-$router->group(['middleware' => 'auth'], function () use ($router) {
-    $router->group(['prefix' => 'categories'], function () use ($router) {
-        $router->get('/', ['uses' => 'CategoryController@get']);
-    });
+$router->group(['prefix' => 'categories'], function () use ($router) {
+    $router->get('/', ['uses' => 'CategoryController@get']);
 });
 
 // Admin only
@@ -54,52 +52,69 @@ $router->group(['middleware' => 'auth:admin'], function () use ($router) {
 | Book
 |--------------------------------------------------------------------------
 |*/
+
 $router->group(['prefix' => 'books'], function () use ($router) {
-    $router->get('/', ['uses' => 'BookController@getAllBooks']);
-
-    $router->get('/{bookId}', ['uses' => 'BookController@getBookById']);
+    $router->get('/', ['uses' => 'BookController@index']);
+    $router->get('/{id}', ['uses' => 'BookController@get']);
 });
 
-$router->group(['middleware' => 'auth'], function () use ($router) {
-    $router->group(['prefix' => 'users'], function () use ($router) {
-        $router->get('/{userId}', ['uses' => 'UserController@getUserById']);
 
-        $router->put('/{userId}', ['uses' => 'UserController@updateUser']);
-
-        $router->delete('/{userId}', ['uses' => 'UserController@destroy']);
-    });
-
-    $router->group(['prefix' => 'transactions'], function () use ($router) {
-        $router->get('/test', ['uses' => 'TransactionController@test']);
-        
-        $router->get('/', ['uses' => 'TransactionController@getAllTransaction']);
-
-        $router->get('/{transactionId}', ['uses' => 'TransactionController@getTransactionId']);
-    });
-});
-
+// Admin only
 $router->group(['middleware' => 'auth:admin'], function () use ($router) {
-    $router->group(['prefix' => 'users'], function () use ($router) {
-        $router->get('/', ['uses' => 'UserController@getUserAll']);
-    });
-
     $router->group(['prefix' => 'books'], function () use ($router) {
         $router->post('/', ['uses' => 'BookController@insert']);
-
-        $router->put('/{bookId}', ['uses' => 'BookController@update']);
-
-        $router->delete('/{bookId}', ['uses' => 'BookController@delete']);
-
-        $router->post('/restore', ['uses' => 'BookController@restore']);
-    });
-
-    $router->group(['prefix' => 'transactions'], function () use ($router) {
-        $router->put('/{transactionId}', ['uses' => 'TransactionController@update']);
+        $router->put('/{id}', ['uses' => 'BookController@update']);
+        $router->delete('/{id}', ['uses' => 'BookController@delete']);
+        $router->post('/{id}', ['uses' => 'BookController@restore']);
     });
 });
 
-$router->group(['middleware' => 'auth:user'], function () use ($router) {
-    $router->group(['prefix' => 'transactions'], function () use ($router) {
-        $router->post('/', ['uses' => 'TransactionController@insert']);
-    });
-});
+// $router->group(['prefix' => 'books'], function () use ($router) {
+//     $router->get('/', ['uses' => 'BookController@getAllBooks']);
+
+//     $router->get('/{bookId}', ['uses' => 'BookController@getBookById']);
+// });
+
+// $router->group(['middleware' => 'auth'], function () use ($router) {
+//     $router->group(['prefix' => 'users'], function () use ($router) {
+//         $router->get('/{userId}', ['uses' => 'UserController@getUserById']);
+
+//         $router->put('/{userId}', ['uses' => 'UserController@updateUser']);
+
+//         $router->delete('/{userId}', ['uses' => 'UserController@destroy']);
+//     });
+
+//     $router->group(['prefix' => 'transactions'], function () use ($router) {
+//         $router->get('/test', ['uses' => 'TransactionController@test']);
+        
+//         $router->get('/', ['uses' => 'TransactionController@getAllTransaction']);
+
+//         $router->get('/{transactionId}', ['uses' => 'TransactionController@getTransactionId']);
+//     });
+// });
+
+// $router->group(['middleware' => 'auth:admin'], function () use ($router) {
+//     $router->group(['prefix' => 'users'], function () use ($router) {
+//         $router->get('/', ['uses' => 'UserController@getUserAll']);
+//     });
+
+//     $router->group(['prefix' => 'books'], function () use ($router) {
+//         $router->post('/', ['uses' => 'BookController@insert']);
+
+//         $router->put('/{bookId}', ['uses' => 'BookController@update']);
+
+//         $router->delete('/{bookId}', ['uses' => 'BookController@delete']);
+
+//         $router->post('/restore', ['uses' => 'BookController@restore']);
+//     });
+
+//     $router->group(['prefix' => 'transactions'], function () use ($router) {
+//         $router->put('/{transactionId}', ['uses' => 'TransactionController@update']);
+//     });
+// });
+
+// $router->group(['middleware' => 'auth:user'], function () use ($router) {
+//     $router->group(['prefix' => 'transactions'], function () use ($router) {
+//         $router->post('/', ['uses' => 'TransactionController@insert']);
+//     });
+// });
