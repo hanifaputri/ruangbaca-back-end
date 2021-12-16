@@ -20,7 +20,7 @@ class TransactionController extends Controller
         //
     }
 
-    public function getAllTransaction(Request $request)
+    public function index(Request $request)
     {
         $role = $request->auth->role;
         
@@ -54,8 +54,8 @@ class TransactionController extends Controller
                             'author' => $transaction->book->author
                         ],
                         'deadline' => $transaction->deadline,
-                        'created_at' => $transaction->created_at,
-                        'updated_at' => $transaction->updated_at,
+                        'borrowed_at' => $transaction->borrowed_at,
+                        'returne_at' => $transaction->returned_at,
                     ];
                     array_push($data, $item);
                 }
@@ -81,10 +81,12 @@ class TransactionController extends Controller
         }
     }
 
-    public function getTransactionId(Request $request, $transactionId)
+    public function get(Request $request, $id)
     {
-        $transaction = Transaction::find($transactionId);
         try {
+            $transaction = Transaction::find($id);
+            // dd($transaction);
+
             if ($transaction) {
                 if ($request->auth->id == $transaction->user_id || $request->auth->role == 'admin'){
                     // Method 2: Predefined the variables
@@ -92,25 +94,21 @@ class TransactionController extends Controller
                     // $book = $transaction->book()->select(['title', 'author'])->get();
     
                     return response()->json([
-                        'success' => true,
-                        'message' => 'Transaction succesfully retrieved',
-                        'data' => [
-                            'transaction' => [
-                                'user' => [
-                                    'name' => $transaction->user->name,
-                                    'email' => $transaction->user->email,
-                                ],
-                                'book' => [
-                                    'title' => $transaction->book->title,
-                                    'author' => $transaction->book->author,
-                                    'description' => $transaction->book->description,
-                                    'synopsis' => $transaction->book->synopsis
-                                ],
-                                'deadline' => $transaction->deadline,
-                                'created_at' => $transaction->created_at,
-                                'updated_at' => $transaction->updated_at,
-                            ]
-                        ]
+                        'success'   => true,
+                        'message'   => 'Transaction successfully retrieved',
+                        'data'      => [
+                            'id' => $transaction->id,
+                            'book' => [
+                                'title' => $transaction->book->title,
+                                'author'=> $transaction->book->author,
+                                'img_url' => $transaction->book->img_url
+                            ],
+                            'deadline' => $transaction->deadline,
+                            'borrowed_at' => $transaction->borrowed_at,
+                            'returned_at' => $transaction->deadline,
+                            'duration' => $duration,
+                            'status' => $transaction->status
+                        ],
                     ], 200);
                 } else {
                     return response()->json([
@@ -136,48 +134,55 @@ class TransactionController extends Controller
     {
         // dd(date('Y-m-d H:i:s', time() + 7 * 24 * 60 * 60));
         $id = $request->input('book_id');
+        $userId = $request->auth->id;
 
-        $val_required = Validator::make($request->all(), [
-            'book_id' => 'integer|required'
+        $this->validate($request, [
+            'book_id' => 'integer|required',
+            'duration' => 'required'
         ]);
 
-        if ($val_required->fails()){
-            return response()->json([
-                'success' => false,
-                'message' => 'Field should not be empty'
-            ], 400);
-        }
+        // Admin should fill user_id
+        if ($request->auth->role == 'admin'){
+            $this->validate($request, [
+                'user_id' => 'integer|required'
+            ]);
+            $userId = $request->input('user_id');
+        } 
 
         try {
             $book = Book::where('id', $id)->first();
             if ($book) {
-                if ($book->stock > 0){
+                if ($book->status == 'Tersedia'){
+                    $duration = $request->input('duration');
+                    
                     $transaction = Transaction::create([
                         'book_id' => $id,
-                        'user_id' => $request->auth->id,
-                        'deadline' => date('Y-m-d H:i:s', time() + 7 * 24 * 60 * 60)
+                        'user_id' => $userId,
+                        'duration' => $duration,
+                        'borrowed_at' => date('Y-m-d H:i:s', time()),
+                        'deadline' => date('Y-m-d H:i:s', time() + (($duration) * 24 * 60 * 60)),
+                        'status' => 'Sedang Dipinjam'
                     ]);
     
-                    $book->stock -= 1;
-                    // Commit update
+                    $book->status = 'Tidak Tersedia';
                     $book->save();
-                    $transaction->save();
         
                     return response()->json([
                         'success'   => true,
                         'message'   => 'Transaction successfully added',
                         'data'      => [
-                            'transaction' => [
-                                'book' => [
-                                    'title' => $transaction->book->title,
-                                    'author'=> $transaction->book->author
-                                ],
-                                'deadline' => $transaction->deadline,
-                                'created_at' => $transaction->created_at,
-                                'updated_at' => $transaction->updated_at
+                            'id' => $transaction->id,
+                            'book' => [
+                                'title' => $transaction->book->title,
+                                'author'=> $transaction->book->author,
+                                'img_url' => $transaction->book->img_url
                             ],
+                            'deadline' => $transaction->deadline,
+                            'borrowed_at' => $transaction->borrowed_at,
+                            'duration' => $transaction->duration,
+                            'status' => $transaction->status
                         ],
-                    ], 201);
+                    ], 200);
                 } else {
                     return response()->json([
                         'success'   => false,
@@ -193,29 +198,32 @@ class TransactionController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan pada server: '. $e->getMessage()
+                'message' => $e->getMessage()
             ], 500);
         }
     }
 
-    public function update(Request $request, $transactionId)
+    public function return(Request $request, $id)
     {
-        $transaction = Transaction::find($transactionId);
+        $transaction = Transaction::find($id);
 
         try {
             if ($transaction) {
+                // Change book status
                 $book = Book::where('id', $transaction->book_id)->first();
+                $book->status = 'Tersedia';
+                $book->save();
 
-                // Update book stock only if it hasn't returned
-                if (isset($transaction->deadline)){
-                    $transaction->deadline = null;
-                    $book->stock += 1;
-                    // Commit update
-                    $book->save();
-                    $transaction->save();
-                }
+                // Update status & return date
+                $returnedDate = strtotime(date('Y-m-d H:i:s', time()));
+                $deadlineDate = strtotime($transaction->deadline);
+                $interval = $deadlineDate - $returnedDate;
+                // dd(($interval > 0) ? 'Selesai': 'Terlambat');
+                
+                $transaction->returned_at = date('Y-m-d H:i:s', time());
+                $transaction->status = ($interval > 0) ? 'Selesai': 'Terlambat';
+                $transaction->save();
 
-                // Else just return a message
                 return response()->json([
                     'success' => true,
                     'message' => 'Book has succesfully returned',
@@ -227,13 +235,13 @@ class TransactionController extends Controller
                             ],
                             'book' => [
                                 'title' => $transaction->book->title,
-                                'author' => $transaction->book->author,
-                                'description' => $transaction->book->description,
-                                'synopsis' => $transaction->book->synopsis
+                                'author'=> $transaction->book->author,
+                                'img_url' => $transaction->book->img_url
                             ],
+                            'status' => $transaction->status,
                             'deadline' => $transaction->deadline,
-                            'created_at' => $transaction->created_at,
-                            'updated_at' => $transaction->updated_at
+                            'borrowed_at' => $transaction->borrowed_at,
+                            'returned_at' => $transaction->returned_at
                         ],
                     ],
                 ], 200);
