@@ -16,7 +16,7 @@ class Book extends Model
      */
     protected $fillable = [
         // TODO: Insert your fillable fields
-        'title', 'description', 'author', 'year', 'synopsis', 'stock'
+        'isbn', 'title', 'img_url', 'publisher_id', 'category_id', 'language_id', 'status', 'author' 
     ];
 
     /**
@@ -28,13 +28,6 @@ class Book extends Model
         // TODO: Insert your hidden fields
         'created_at', 'updated_at', 'deleted_at'
     ];
-
-    /**
-     * The attributes that should be mutated to dates.
-     *
-     * @var array
-     */
-    protected $dates = ['deleted_at'];
 
     /**
      * Define relationship betweeen books and transactions
