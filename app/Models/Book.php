@@ -30,12 +30,27 @@ class Book extends Model
     ];
 
     /**
-     * Define relationship betweeen books and transactions
+     * Define relationship betweeen entities
      * 
      * 
      */
     public function transactions()
     {
         return $this->hasMany(Transaction::class);
+    }
+
+    public function publisher()
+    {
+        return $this->belongsTo(Publisher::class);
+    }
+
+    public function language()
+    {
+        return $this->belongsTo(Language::class);
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
     }
 }

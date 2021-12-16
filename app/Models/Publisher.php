@@ -32,11 +32,11 @@ class Publisher extends Model
     ];
 
     /**
-     * Get publisher  associated with transaction
+     * Get publisher associated with transaction
      * 
      */
     public function book()
     {
-        return $this->belongsTo(Book::class);
+        return $this->hasMany(Book::class);
     }
 }

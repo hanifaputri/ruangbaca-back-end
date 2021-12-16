@@ -20,7 +20,7 @@ class CreateBooks extends Migration
             $table->string('title', 100);
             $table->string('img_url');
             $table->string('author', 50);
-            $table->enum('status',['Tersedia, Tidak Tersedia']);
+            $table->enum('status',['Tersedia', 'Tidak Tersedia']);
             
             $table->foreignId('publisher_id')->constrained('publishers');
             $table->foreignId('category_id')->constrained('categories');
