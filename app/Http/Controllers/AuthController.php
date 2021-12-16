@@ -20,7 +20,7 @@ class AuthController extends Controller
     {
         //
     }
-    // pengaturan JWT
+
     private function jwt($user) {
         $payload =array(
             'sub' => $user->email,
@@ -48,7 +48,7 @@ class AuthController extends Controller
         // Empty field validation
         $val_required = Validator::make($request->all(), [
             'name'      => 'required',
-            'email'     => 'unique:users|required|email',
+            'email'     => 'required|email',
             'password'  => 'required',
         ]);
 
@@ -72,27 +72,29 @@ class AuthController extends Controller
                 if($register){
                     return response()->json([
                         'success' => true,
-                        'message' => 'Register Success!',
-                        'data' => ['token'=>$this->jwt($register),]
+                        'message' => 'Register successful',
+                        'data' => [
+                            'name' => $name,
+                            'token'=> $this->jwt($register)
+                            ]
                     ], 201);
                 } else {
                     return response()->json([
                         'success' => false,
-                        'message' => 'Register Failed!'
+                        'message' => 'Register failed'
                     ], 400);
                 }
             } else {
                 return response()->json([
-                    'success' => true,
-                    'message' => 'Register Success!',
-                    'data' => ['token'=>$this->jwt($register),]
-                ], 201);
+                    'success' => false,
+                    'message' => 'Email already exists'
+                ], 400);
             };
         } catch(\Exception $e){
             return response()->json([
                 'success'=>false,
-                'message'=>'Email already exists'
-            ], 400);
+                'message'=>$e->getMessage()
+            ], 500);
         }
     }
 
@@ -106,22 +108,23 @@ class AuthController extends Controller
             if (!$user){
                 return response()->json([
                     'success'=>false,
-                    'message'=>'Email not found!'
+                    'message'=>'User not found'
                 ], 404);
             };
 
-            if (Hash::check($request->password,$user->password)){
+            if (Hash::check($request->password, $user->password)){
                 return response()->json([
-                    'success'=>true,
-                    'message'=>'Successfully Logged in!',
+                    'success'=> true,
+                    'message'=>'Login successful',
                     'data'=>[
+                        'name' => $user->name,
                         'token'=>$this->jwt($user)
                     ]
                 ],200);
             } else {
                 return response()->json([
                     'success'=>false,
-                    'message'=>'Credential not match!'
+                    'message'=>'Credential not match'
                 ], 400);
             };
         } catch(\Exception $e) {
