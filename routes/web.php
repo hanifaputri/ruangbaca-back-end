@@ -103,3 +103,23 @@ $router->group(['middleware' => 'auth:user'], function () use ($router) {
         $router->post('/', ['uses' => 'TransactionController@insert']);
     });
 });
+
+/*
+|--------------------------------------------------------------------------
+| Book
+|--------------------------------------------------------------------------
+|*/
+
+$router->group(['prefix' => 'languages'], function () use ($router) {
+    $router->get('/', ['uses' => 'LanguageController@getLanguageAll']);
+});
+
+// Admin only
+$router->group(['middleware' => 'auth:admin'], function () use ($router) {
+    $router->group(['prefix' => 'languages'], function () use ($router) {
+        $router->get('/{id}', ['uses' => 'LanguageController@getLanguageById']);
+        $router->post('/', ['uses' => 'LanguageController@insertLanguage']);
+        $router->put('/{id}', ['uses' => 'LanguageController@updateLanguage']);
+        $router->delete('/{id}', ['uses' => 'LanguageController@deleteLanguage']);
+    });
+});
