@@ -30,6 +30,27 @@ $router->group(['prefix' => 'auth'], function () use ($router) {
 
 /*
 |--------------------------------------------------------------------------
+| User
+|--------------------------------------------------------------------------
+|*/
+
+$router->group(['middleware' => 'auth'], function () use ($router) {
+    $router->group(['prefix' => 'users'], function () use ($router) {
+        $router->get('/{id}', ['uses' => 'UserController@getUserById']);
+        $router->put('/{id}', ['uses' => 'UserController@update']);
+        $router->delete('/{id}', ['uses' => 'UserController@delete']);
+    });
+});
+
+$router->group(['middleware' => 'auth:admin'], function () use ($router) {
+    $router->group(['prefix' => 'users'], function () use ($router) {
+        $router->get('/', ['uses' => 'UserController@index']);
+        $router->post('/restore', ['uses' => 'UserController@restore']);
+    });
+});
+
+/*
+|--------------------------------------------------------------------------
 | Category
 |--------------------------------------------------------------------------
 |*/
@@ -107,11 +128,13 @@ $router->group(['middleware' => 'auth:admin'], function () use ($router) {
         $router->post('/', ['uses' => 'BookController@insert']);
         $router->put('/{id}', ['uses' => 'BookController@update']);
         $router->delete('/{id}', ['uses' => 'BookController@delete']);
-        $router->post('/{id}', ['uses' => 'BookController@restore']);
+        $router->post('/restore', ['uses' => 'BookController@restore']);
     });
 });
 
 
+
+    
 // $router->group(['prefix' => 'books'], function () use ($router) {
 //     $router->get('/', ['uses' => 'BookController@getAllBooks']);
 
@@ -161,8 +184,8 @@ $router->group(['middleware' => 'auth:admin'], function () use ($router) {
 //         $router->post('/', ['uses' => 'TransactionController@insert']);
 //     });
 // });
-$router->group(['middleware' => 'auth:user'], function () use ($router) {
-    $router->group(['prefix' => 'transactions'], function () use ($router) {
-        $router->post('/', ['uses' => 'TransactionController@insert']);
-    });
-});
+// $router->group(['middleware' => 'auth:user'], function () use ($router) {
+//     $router->group(['prefix' => 'transactions'], function () use ($router) {
+//         $router->post('/', ['uses' => 'TransactionController@insert']);
+//     });
+// });
