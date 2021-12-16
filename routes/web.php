@@ -49,6 +49,27 @@ $router->group(['middleware' => 'auth:admin'], function () use ($router) {
 
 /*
 |--------------------------------------------------------------------------
+| Publisher
+|--------------------------------------------------------------------------
+|*/
+
+$router->group(['prefix' => 'publishers'], function () use ($router) {
+    $router->get('/', ['uses' => 'PublisherController@get']);
+    $router->get('/{id}', ['uses' => 'PublisherController@getPublisherById']);
+});
+
+// Admin Only
+$router->group(['middleware' => 'auth:admin'], function () use ($router) {
+    $router->group(['prefix' => 'publishers'], function () use ($router) {
+        $router->post('/', ['uses' => 'PublisherController@insert']);
+        $router->put('/{id}', ['uses' => 'PublisherController@update']);
+        $router->delete('/{id}', ['uses' => 'PublisherController@delete']);
+    });
+});
+
+
+/*
+|--------------------------------------------------------------------------
 | Book
 |--------------------------------------------------------------------------
 |*/
