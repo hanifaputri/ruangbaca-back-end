@@ -52,8 +52,8 @@ class Authorization
         } catch (Exception $e){
             return response()->json([
                 'success'=>false,
-                'message'=>'Terjadi kesalahan server'
-            ], $e->getStatusCode());
+                'message'=> $e->getMessage()
+            ], 500);
         }   
 
         $id = $user->id;
@@ -70,6 +70,7 @@ class Authorization
             if ($role) {
                 if ($this->hasRole($id, $role)){
                     // var_dump($request->auth);
+
                     // die();
                     return $next($request);
                 } else {
