@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 use App\Models\Book;
-// use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -30,12 +29,14 @@ class BookController extends Controller
                 foreach($books as $book){
                     $item = [
                         'id' => $book->id,
+                        'title' => $book->title,
                         'isbn' => $book->isbn,
                         'img_url' => $book->img_url,
                         'author' => $book->author,
                         'publisher' => $book->publisher->publisher,
                         'category' => $book->category->category,
-                        'language' => $book->language->language
+                        'language' => $book->language->language,
+                        'status' => $book->status
                     ];
                     array_push($data, $item);
                 }
