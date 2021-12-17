@@ -176,7 +176,7 @@ class BookController extends Controller
                         'data' => [
                             'keyword' => $keyword,
                             'category' => $request->query('category') ?? 'All',
-                            'total_result' => sizeof($item),
+                            'total_result' => sizeof($data),
                             'books' => $data
                             ]
                     ], 200);
