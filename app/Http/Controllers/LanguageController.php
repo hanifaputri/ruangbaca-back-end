@@ -47,13 +47,11 @@ class LanguageController extends Controller
         $language = Language::where('id', $id)->first();
 
         try {
-            if ($language->id == $id) {
+            if ($language) {
                 return response()->json([
                     'success'   => true,
                     'message'   => 'Language found',
-                    'data'      => [
-                        'language'  => $language
-                    ]
+                    'data'      => $language
                 ], 200);
             } else {
                 return response()->json([
@@ -69,7 +67,7 @@ class LanguageController extends Controller
         }
     }
 
-    public function insertLanguage(Request $request)
+    public function insert(Request $request)
     {
         $this->validate($request, ['language' => 'required|unique:languages']);
 
@@ -91,7 +89,7 @@ class LanguageController extends Controller
         }
     }
 
-    public function updateLanguage(Request $request, $id)
+    public function update(Request $request, $id)
     {
         $language = Language::where('id', $id)->first();
 
@@ -121,7 +119,7 @@ class LanguageController extends Controller
         }
     }
 
-    public function deleteLanguage(Request $request, $id)
+    public function delete(Request $request, $id)
     {
         $language = Language::where('id', $id)->first();
         

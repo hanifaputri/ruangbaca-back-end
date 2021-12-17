@@ -13,7 +13,7 @@ class Transaction extends Model
      * @var array
      */
     protected $fillable = [
-        'id', 'book_id', 'user_id', 'deadline'
+        'id', 'book_id', 'user_id', 'deadline', 'borrowed_at', 'returned_at', 'duration', 'status'
     ];
 
     /**
@@ -23,6 +23,12 @@ class Transaction extends Model
      */
     protected $hidden = [
     ];
+
+    /**
+     * Disable timestamps
+     * 
+     */
+    public $timestamps = false;
 
     /**
      * Get book associated with transaction

@@ -35,6 +35,5 @@ class CreateUsers extends Migration
     public function down()
     {
         Schema::dropIfExists('users');
-        $table->dropSoftDeletes();
     }
 }

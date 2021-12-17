@@ -16,7 +16,7 @@ class Book extends Model
      */
     protected $fillable = [
         // TODO: Insert your fillable fields
-        'title', 'description', 'author', 'year', 'synopsis', 'stock'
+        'isbn', 'title', 'img_url', 'publisher_id', 'category_id', 'language_id', 'status', 'author' 
     ];
 
     /**
@@ -30,19 +30,27 @@ class Book extends Model
     ];
 
     /**
-     * The attributes that should be mutated to dates.
-     *
-     * @var array
-     */
-    protected $dates = ['deleted_at'];
-
-    /**
-     * Define relationship betweeen books and transactions
+     * Define relationship betweeen entities
      * 
      * 
      */
     public function transactions()
     {
         return $this->hasMany(Transaction::class);
+    }
+
+    public function publisher()
+    {
+        return $this->belongsTo(Publisher::class);
+    }
+
+    public function language()
+    {
+        return $this->belongsTo(Language::class);
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
     }
 }

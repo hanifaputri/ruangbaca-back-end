@@ -118,9 +118,7 @@ class PublisherController extends Controller
                 return response()->json([
                     'success' => true,
                     'message' => 'Publisher succesfully retrieved',
-                    'data' => [
-                    'publisher' => $publisher
-                    ]
+                    'data' => $publisher
                 ], 200);
             } else {
                 return response()->json([

@@ -13,14 +13,16 @@ class CreateTransactions extends Migration
      */
     public function up()
     {
+        // php artisan migrate:refresh --path=/database/migrations/2021_12_16_103520_create_transactions.php
         Schema::create('transactions', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->foreignId('book_id')->constrained('books');
-            $table->foreignId('publisher_id')->constrained('publishers');
             $table->foreignId('user_id')->constrained('users');
-            $table->date('deadline')->nullable();
-            $table->enum('status',['Sedang Dipinjam, Dikembalikan, Terlambat']);
-            $table->timestamps();
+            $table->integer('duration');
+            $table->enum('status',['Sedang Dipinjam', 'Selesai', 'Terlambat']);
+            $table->timestamp('borrowed_at')->nullable();
+            $table->timestamp('deadline')->nullable();
+            $table->timestamp('returned_at')->nullable();
 
             // Enable Soft Deletes
             $table->softDeletes();
@@ -35,6 +37,5 @@ class CreateTransactions extends Migration
     public function down()
     {
         Schema::dropIfExists('transactions');
-        $table->dropSoftDeletes();
     }
 }
