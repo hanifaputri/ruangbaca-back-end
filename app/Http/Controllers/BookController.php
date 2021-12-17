@@ -44,7 +44,9 @@ class BookController extends Controller
                 return response()->json([
                     'success' => true,
                     'message' => 'Book succesfully retrieved',
-                    'data' => $data
+                    'data' => [
+                        'books'=> $data
+                        ]
                 ], 200);
             }else {
                 return response()->json([
@@ -157,6 +159,7 @@ class BookController extends Controller
                     foreach($result as $book){
                         $item = [
                             'id' => $book->id,
+                            'title' => $book->title,
                             'isbn' => $book->isbn,
                             'img_url' => $book->img_url,
                             'author' => $book->author,
