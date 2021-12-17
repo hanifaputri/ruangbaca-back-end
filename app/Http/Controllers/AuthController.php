@@ -74,7 +74,8 @@ class AuthController extends Controller
                         'success' => true,
                         'message' => 'Register successful',
                         'data' => [
-                            'name' => $name,
+                            'id' => $register->id,
+                            'name' => $register->name,
                             'token'=> $this->jwt($register)
                             ]
                     ], 201);
@@ -117,6 +118,7 @@ class AuthController extends Controller
                     'success'=> true,
                     'message'=>'Login successful',
                     'data'=>[
+                        'id' => $user->id,
                         'name' => $user->name,
                         'token'=>$this->jwt($user)
                     ]
