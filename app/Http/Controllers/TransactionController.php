@@ -55,7 +55,7 @@ class TransactionController extends Controller
                         ],
                         'deadline' => $transaction->deadline,
                         'borrowed_at' => $transaction->borrowed_at,
-                        'returne_at' => $transaction->returned_at,
+                        'returned_at' => $transaction->returned_at,
                     ];
                     array_push($data, $item);
                 }
