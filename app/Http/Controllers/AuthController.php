@@ -33,11 +33,41 @@ class AuthController extends Controller
         return JWT::encode($payload,env('JWT_KEY'),'HS256');
     }
 
+    public function refreshToken(Request $request)
+    {
+        // Accept old token
+        $oldToken = $request->input('token');
+
+        try {
+            $payload = JWT::decode($oldToken,env('JWT_KEY'),['HS256']);
+            
+            // Renew token expiration time
+            $payload->iat = time();
+            $payload->exp = time() + 60 * 60;
+
+            $newToken = JWT::encode($payload,env('JWT_KEY'),'HS256');
+            // var_dump($newToken);
+            // die();
+
+            return response()->json([
+                'success'=>true,
+                'access_token'=> $newToken
+            ], 200);
+        } catch (\Exception $e){
+            return response()->json([
+                'success'=>false,
+                'message'=>'JWT error: '. $e->getMessage()
+            ], 401);
+        }
+    }
+
     public function register(Request $request)
     {
         $name = $request->input('name');
         $email = $request->input('email');
+        // dd($email);
         $password = Hash::make($request->input('password'));
+        
         $role = $request->input('role') ?? 'User';
         
         // Role validation
@@ -61,6 +91,7 @@ class AuthController extends Controller
 
         try {
             $user = User::where('email', $request->email)->first();
+
             if (!$user){
                 $register = User::create([
                     'name'      => $name,
@@ -75,9 +106,9 @@ class AuthController extends Controller
                         'message' => 'Register successful',
                         'data' => [
                             'id' => $register->id,
-                            'name' => $register->name,
-                            'token'=> $this->jwt($register)
-                            ]
+                            'name' => $register->name
+                        ],
+                        'access_token' => $this->jwt($register)
                     ], 201);
                 } else {
                     return response()->json([
@@ -119,9 +150,9 @@ class AuthController extends Controller
                     'message'=>'Login successful',
                     'data'=>[
                         'id' => $user->id,
-                        'name' => $user->name,
-                        'token'=>$this->jwt($user)
-                    ]
+                        'name' => $user->name
+                    ],
+                    'access_token' => $this->jwt($user)
                 ],200);
             } else {
                 return response()->json([

@@ -44,7 +44,9 @@ class BookController extends Controller
                 return response()->json([
                     'success' => true,
                     'message' => 'Book succesfully retrieved',
-                    'data' => $data
+                    'data' => [
+                        'books'=> $data
+                        ]
                 ], 200);
             }else {
                 return response()->json([
@@ -69,7 +71,17 @@ class BookController extends Controller
                 return response()->json([
                     'success' => true,
                     'message' => 'Book succesfully retrieved',
-                    'data' => $book
+                    'data' => [
+                        'id' => $book->id,
+                        'title' => $book->title,
+                        'isbn' => $book->isbn,
+                        'img_url' => $book->img_url,
+                        'author' => $book->author,
+                        'publisher' => $book->publisher->publisher,
+                        'category' => $book->category->category,
+                        'language' => $book->language->language,
+                        'status' => $book->status
+                    ]
                 ], 200);
             } else {
                 return response()->json([
@@ -147,6 +159,7 @@ class BookController extends Controller
                     foreach($result as $book){
                         $item = [
                             'id' => $book->id,
+                            'title' => $book->title,
                             'isbn' => $book->isbn,
                             'img_url' => $book->img_url,
                             'author' => $book->author,
@@ -163,7 +176,7 @@ class BookController extends Controller
                         'data' => [
                             'keyword' => $keyword,
                             'category' => $request->query('category') ?? 'All',
-                            'total_result' => sizeof($item),
+                            'total_result' => sizeof($data),
                             'books' => $data
                             ]
                     ], 200);

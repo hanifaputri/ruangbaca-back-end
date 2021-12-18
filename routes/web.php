@@ -25,6 +25,7 @@ $router->get('/', function () use ($router) {
 $router->group(['prefix' => 'auth'], function () use ($router) {
     $router->post('/register', ['uses' => 'AuthController@register']);
     $router->post('/login', ['uses' => 'AuthController@login']);
+    $router->post('/jwt/refresh', ['uses' => 'AuthController@refreshToken']);
 });
 
 /*
