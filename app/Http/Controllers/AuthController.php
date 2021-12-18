@@ -33,6 +33,34 @@ class AuthController extends Controller
         return JWT::encode($payload,env('JWT_KEY'),'HS256');
     }
 
+    public function refreshToken(Request $request)
+    {
+        // Accept old token
+        $oldToken = $request->input('token');
+
+        try {
+            $payload = JWT::decode($oldToken,env('JWT_KEY'),['HS256']);
+            
+            // Renew token expiration time
+            $payload->iat = time();
+            $payload->exp = time() + 60 * 60;
+
+            $newToken = JWT::encode($payload,env('JWT_KEY'),'HS256');
+            // var_dump($newToken);
+            // die();
+
+            return response()->json([
+                'success'=>true,
+                'access_token'=> $newToken
+            ], 200);
+        } catch (\Exception $e){
+            return response()->json([
+                'success'=>false,
+                'message'=>'JWT error: '. $e->getMessage()
+            ], 401);
+        }
+    }
+
     public function register(Request $request)
     {
         $name = $request->input('name');
