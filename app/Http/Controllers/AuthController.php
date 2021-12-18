@@ -65,7 +65,9 @@ class AuthController extends Controller
     {
         $name = $request->input('name');
         $email = $request->input('email');
+        // dd($email);
         $password = Hash::make($request->input('password'));
+        
         $role = $request->input('role') ?? 'User';
         
         // Role validation
@@ -89,6 +91,7 @@ class AuthController extends Controller
 
         try {
             $user = User::where('email', $request->email)->first();
+
             if (!$user){
                 $register = User::create([
                     'name'      => $name,
@@ -103,9 +106,9 @@ class AuthController extends Controller
                         'message' => 'Register successful',
                         'data' => [
                             'id' => $register->id,
-                            'name' => $register->name,
-                            'token'=> $this->jwt($register)
-                            ]
+                            'name' => $register->name
+                        ],
+                        'access_token' => $this->jwt($register)
                     ], 201);
                 } else {
                     return response()->json([
@@ -147,9 +150,9 @@ class AuthController extends Controller
                     'message'=>'Login successful',
                     'data'=>[
                         'id' => $user->id,
-                        'name' => $user->name,
-                        'token'=>$this->jwt($user)
-                    ]
+                        'name' => $user->name
+                    ],
+                    'access_token' => $this->jwt($user)
                 ],200);
             } else {
                 return response()->json([
