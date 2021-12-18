@@ -106,7 +106,7 @@ class TransactionController extends Controller
                             'deadline' => $transaction->deadline,
                             'borrowed_at' => $transaction->borrowed_at,
                             'returned_at' => $transaction->deadline,
-                            'duration' => $duration,
+                            'duration' => $transaction->duration,
                             'status' => $transaction->status
                         ],
                     ], 200);
